@@ -33,7 +33,7 @@ import java.net.URL
  */
 internal object MapTileStore {
     private const val MemoryCacheBytes = 10 * 1024 * 1024
-    private const val DiskCacheBytes = 120L * 1024L * 1024L
+    private const val DiskCacheBytes = 512L * 1024L * 1024L
     private const val MaxTileFileBytes = 512 * 1024
     private const val MaxParallelDownloads = 3
     private const val TrimEveryNWrites = 100
@@ -77,6 +77,8 @@ internal object MapTileStore {
 
     /** Loads a tile from disk or network in [scope]; no-op when already cached or in flight. */
     fun request(scope: CoroutineScope, zoom: Int, x: Int, y: Int) {
+        // Never construct a URL or disk path for an invalid slippy-map tile.
+        if (zoom !in 0..22 || x < 0 || y < 0 || x.toLong() >= (1L shl zoom) || y.toLong() >= (1L shl zoom)) return
         val source = _source.value
         val key = key(source, zoom, x, y)
         if (memory.get(key) != null) return
@@ -150,8 +152,20 @@ internal object MapTileStore {
                 return null
             }
 
-            val bytes = connection.inputStream.use { it.readBytes() }
-            if (bytes.isEmpty() || bytes.size > MaxTileFileBytes) return null
+            // Bound the download while reading; readBytes() could allocate unbounded memory.
+            if (connection.contentLengthLong > MaxTileFileBytes) return null
+            val bytes = connection.inputStream.use { input ->
+                val output = java.io.ByteArrayOutputStream()
+                val buffer = ByteArray(8192)
+                while (true) {
+                    val count = input.read(buffer)
+                    if (count < 0) break
+                    if (output.size() + count > MaxTileFileBytes) return null
+                    output.write(buffer, 0, count)
+                }
+                output.toByteArray()
+            }
+            if (bytes.isEmpty()) return null
 
             val tile = decode(bytes) ?: return null
             writeToDisk(source, zoom, x, y, bytes)
@@ -195,7 +209,7 @@ internal object MapTileStore {
     }
 
     private fun trimDisk() {
-        val files = diskDirectory?.listFiles()?.filter(File::isFile) ?: return
+        val files = diskDirectory?.listFiles()?.filter { it.isFile && it.extension == "png" } ?: return
         var total = files.sumOf { it.length() }
         if (total <= DiskCacheBytes) return
         for (file in files.sortedBy(File::lastModified)) {
