@@ -601,13 +601,13 @@ private fun ZoomButton(icon: androidx.compose.ui.graphics.vector.ImageVector, la
     }
 }
 
-/** Mild contrast + saturation lift for the dark MapTiler tiles (clearer roads and labels). */
+/** Neutral graphite grade: removes the blue cast of the source while retaining readable roads. */
 private val GradeTileFilter = ColorFilter.colorMatrix(
     ColorMatrix(
         floatArrayOf(
-            1.389f, -0.172f, -0.017f, 0f, -34f,
-            -0.051f, 1.268f, -0.017f, 0f, -34f,
-            -0.051f, -0.172f, 1.423f, 0f, -34f,
+            0.255f, 0.500f, 0.095f, 0f, 5f,
+            0.260f, 0.510f, 0.100f, 0f, 8f,
+            0.275f, 0.530f, 0.105f, 0f, 12f,
             0f, 0f, 0f, 1f, 0f,
         ),
     ),
