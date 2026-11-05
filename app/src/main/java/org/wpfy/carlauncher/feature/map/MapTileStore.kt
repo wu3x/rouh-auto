@@ -37,6 +37,7 @@ internal object MapTileStore {
     private const val MaxTileFileBytes = 512 * 1024
     private const val MaxParallelDownloads = 3
     private const val TrimEveryNWrites = 100
+    private const val MaxTrackedFailures = 2_000
 
     private val memory = object : LruCache<String, ImageBitmap>(MemoryCacheBytes) {
         override fun sizeOf(key: String, value: ImageBitmap): Int {
@@ -100,7 +101,10 @@ internal object MapTileStore {
                         synchronized(lock) { failedAt.remove(key) }
                         _version.update { it + 1 }
                     } else {
-                        synchronized(lock) { failedAt[key] = SystemClock.elapsedRealtime() }
+                        synchronized(lock) {
+                            if (failedAt.size >= MaxTrackedFailures) failedAt.clear()
+                            failedAt[key] = SystemClock.elapsedRealtime()
+                        }
                     }
                 }
             } finally {
@@ -119,6 +123,10 @@ internal object MapTileStore {
     private fun loadFromDisk(source: MapStyle.Source, zoom: Int, x: Int, y: Int): ImageBitmap? {
         val file = tileFile(source, zoom, x, y) ?: return null
         if (!file.isFile) return null
+        if (file.length() <= 0 || file.length() > MaxTileFileBytes) {
+            file.delete()
+            return null
+        }
         val bytes = try {
             file.readBytes()
         } catch (_: IOException) {
