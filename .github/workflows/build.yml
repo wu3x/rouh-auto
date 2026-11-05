@@ -28,12 +28,23 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -f car-launcher-modified.zip && ! -f settings.gradle.kts ]]; then
-            echo "Importing original working project into regular tracked files..."
+            echo "Inspecting ZIP contents..."
+            unzip -Z -1 car-launcher-modified.zip | head -30 || true
             mkdir -p .import-src
             unzip -q car-launcher-modified.zip -d .import-src
-            test -f .import-src/car-launcher-main/settings.gradle.kts
-            test -f .import-src/car-launcher-main/gradlew
-            cp -a .import-src/car-launcher-main/. ./
+
+            # Locate the Gradle project regardless of its top-level folder name.
+            project_settings="$(find .import-src -type f -name settings.gradle.kts -print -quit)"
+            if [[ -z "$project_settings" ]]; then
+              echo "::error::No settings.gradle.kts found in the uploaded ZIP. Ensure it contains the Android source project, not a GitHub repository wrapper."
+              find .import-src -maxdepth 3 -type f | head -50 || true
+              exit 1
+            fi
+            project_dir="$(dirname "$project_settings")"
+            echo "Found Android project at: $project_dir"
+            test -f "$project_dir/gradlew" || { echo "::error::Missing gradlew"; exit 1; }
+            test -f "$project_dir/app/build.gradle.kts" || { echo "::error::Missing app/build.gradle.kts"; exit 1; }
+            cp -a "$project_dir"/. ./
             rm -rf .import-src
             rm car-launcher-modified.zip
             git config user.name "github-actions[bot]"
@@ -48,7 +59,7 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Project source is not uploaded yet. Upload car-launcher-modified.zip to start the first build."
+            echo "::notice::Project source is not uploaded yet."
           fi
 
       - name: Set up Java 17
