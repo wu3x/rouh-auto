@@ -59,10 +59,12 @@ fun OnboardingRoute(stateHolder: SettingsStateHolder) {
     val step = runCatching { OnboardingStep.valueOf(stepName) }.getOrDefault(OnboardingStep.Setup)
     var selectedRailName by rememberSaveable { mutableStateOf<String?>(null) }
 
+    // Skip is intended for emulator/desktop testing. Permissions can be granted later in Settings.
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
     when (step) {
         OnboardingStep.Setup -> SetupScreen(
             onContinue = { stepName = nextOnboardingStep(OnboardingStep.Setup).name },
+            onSkip = { stateHolder.completeOnboarding(RailPosition.Left) },
         )
 
         OnboardingStep.RailPosition -> RailPositionScreen(
@@ -78,7 +80,7 @@ fun OnboardingRoute(stateHolder: SettingsStateHolder) {
 }
 
 @Composable
-private fun SetupScreen(onContinue: () -> Unit) {
+private fun SetupScreen(onContinue: () -> Unit, onSkip: () -> Unit) {
     val context = LocalContext.current
     val activity = remember(context) { context.findComponentActivity() }
     var refreshGeneration by remember { mutableIntStateOf(0) }
@@ -104,6 +106,7 @@ private fun SetupScreen(onContinue: () -> Unit) {
         subtitle = stringResource(R.string.ob_setup_subtitle),
         continueEnabled = status.allSatisfied,
         onContinue = onContinue,
+        onSkip = onSkip,
     ) {
         CapabilityRow(
             title = stringResource(R.string.ob_location_title),
@@ -196,6 +199,7 @@ private fun OnboardingScaffold(
     continueEnabled: Boolean,
     onContinue: () -> Unit,
     onBack: (() -> Unit)? = null,
+    onSkip: (() -> Unit)? = null,
     continueLabel: String = stringResource(R.string.ob_continue),
     content: @Composable () -> Unit,
 ) {
@@ -230,6 +234,12 @@ private fun OnboardingScaffold(
             if (onBack != null) {
                 TextButton(onClick = onBack) { Text(stringResource(R.string.settings_back)) }
                 Spacer(modifier = Modifier.weight(1f))
+            }
+            if (onSkip != null) {
+                TextButton(onClick = onSkip) {
+                    Text("تخطي")
+                }
+                Spacer(modifier = Modifier.widthIn(min = 12.dp))
             }
             Button(
                 onClick = onContinue,
