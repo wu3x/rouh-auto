@@ -209,131 +209,30 @@ private fun NavigationSurface(
     onStopNavigation: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // The dashboard is a glanceable live map, not a turn-by-turn navigation screen.
+    // Keep the map unobstructed and preserve the existing GPS location provider.
     Box(
         modifier = modifier
             .clip(CarShapes.medium)
-            .background(CarColors.Surface),
+            .background(Color(0xFF10151B)),
     ) {
-        MiniMap(
-            modifier = Modifier.fillMaxSize(),
-            route = state.routeSummary?.geometry.orEmpty(),
-            destination = state.destination?.let { target ->
-                val lat = target.latitude
-                val lon = target.longitude
-                if (state.active && lat != null && lon != null) GeoPoint(lat, lon) else null
-            },
-        )
+        MiniMap(modifier = Modifier.fillMaxSize())
 
+        // Small, unobtrusive GPS marker instead of a large navigation overlay.
         Surface(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(56.dp),
+            modifier = Modifier.align(Alignment.Center).size(46.dp),
             shape = CircleShape,
-            color = CarColors.AccentStrong,
-            shadowElevation = 8.dp,
+            color = Color(0xFF1269E8),
+            shadowElevation = 6.dp,
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Rounded.Navigation,
                     contentDescription = null,
-                    modifier = Modifier.size(30.dp),
+                    modifier = Modifier.size(27.dp),
                     tint = Color.White,
                 )
             }
-        }
-
-        when {
-            state.calculating -> NavigationStatusCard(
-                icon = Icons.Rounded.AltRoute,
-                title = stringResource(R.string.nav_calculating_title),
-                body = stringResource(R.string.nav_calculating_body),
-                actionLabel = stringResource(R.string.nav_cancel),
-                onAction = onStopNavigation,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(16.dp),
-            )
-
-            state.progress.arrived -> NavigationStatusCard(
-                icon = Icons.Rounded.CheckCircle,
-                title = stringResource(R.string.nav_arrived_title),
-                body = stringResource(R.string.nav_arrived_body),
-                actionLabel = stringResource(R.string.nav_search_destination),
-                onAction = onSearchClick,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(16.dp),
-            )
-
-            !state.gpsAvailable -> NavigationStatusCard(
-                icon = Icons.Rounded.LocationOff,
-                title = stringResource(R.string.nav_gps_title),
-                body = stringResource(R.string.nav_gps_body),
-                actionLabel = stringResource(R.string.nav_try_again),
-                onAction = onSearchClick,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(16.dp),
-            )
-
-            state.error == NavigationError.ProviderUnavailable -> NavigationStatusCard(
-                icon = Icons.Rounded.AltRoute,
-                title = stringResource(R.string.nav_provider_title),
-                body = stringResource(R.string.nav_provider_body),
-                actionLabel = stringResource(R.string.nav_search_destination),
-                onAction = onSearchClick,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(16.dp),
-            )
-
-            state.error != null -> NavigationStatusCard(
-                icon = Icons.Rounded.AltRoute,
-                title = when (state.error) {
-                    NavigationError.RouteUnavailable -> stringResource(R.string.nav_route_unavailable_title)
-                    NavigationError.PermissionDenied -> stringResource(R.string.nav_permission_title)
-                    else -> stringResource(R.string.nav_unavailable_title)
-                },
-                body = when (state.error) {
-                    NavigationError.RouteUnavailable -> stringResource(R.string.nav_route_unavailable_body) +
-                        (state.errorDetail?.let { "\n$it" } ?: "")
-                    NavigationError.PermissionDenied -> stringResource(R.string.nav_permission_body)
-                    else -> stringResource(R.string.nav_unavailable_body)
-                },
-                actionLabel = stringResource(R.string.nav_try_again),
-                onAction = onSearchClick,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(16.dp),
-            )
-
-            state.active && state.progress.nextManeuver != null -> {
-                TurnCard(
-                    progress = state.progress,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(16.dp),
-                )
-                EtaCard(
-                    progress = state.progress,
-                    onStopNavigation = onStopNavigation,
-                    onSearchClick = onSearchClick,
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(16.dp),
-                )
-            }
-
-            else -> NavigationStatusCard(
-                icon = Icons.Rounded.Navigation,
-                title = stringResource(R.string.nav_ready_title),
-                body = stringResource(R.string.nav_ready_body),
-                actionLabel = stringResource(R.string.nav_search_destination),
-                onAction = onSearchClick,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(16.dp),
-            )
         }
     }
 }
