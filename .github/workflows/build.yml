@@ -33,18 +33,32 @@ jobs:
             mkdir -p .import-src
             unzip -q car-launcher-modified.zip -d .import-src
 
-            # Locate the Gradle project regardless of its top-level folder name.
+            # Some GitHub source downloads wrap the actual Android ZIP.
+            # Expand nested ZIPs (bounded to three levels), then locate Gradle.
+            for depth in 1 2 3; do
+              project_settings="$(find .import-src -type f -name settings.gradle.kts -print -quit)"
+              if [[ -n "$project_settings" ]]; then break; fi
+              nested_zip="$(find .import-src -type f -iname '*.zip' -print -quit)"
+              if [[ -z "$nested_zip" ]]; then break; fi
+              echo "Expanding nested archive (level $depth): $nested_zip"
+              nested_dir=".import-src/nested-$depth"
+              mkdir -p "$nested_dir"
+              unzip -q "$nested_zip" -d "$nested_dir"
+              rm -f "$nested_zip"
+            done
             project_settings="$(find .import-src -type f -name settings.gradle.kts -print -quit)"
             if [[ -z "$project_settings" ]]; then
-              echo "::error::No settings.gradle.kts found in the uploaded ZIP. Ensure it contains the Android source project, not a GitHub repository wrapper."
-              find .import-src -maxdepth 3 -type f | head -50 || true
+              echo "::error::No Android Gradle project found after expanding nested ZIPs."
+              find .import-src -maxdepth 5 -type f | head -60 || true
               exit 1
             fi
             project_dir="$(dirname "$project_settings")"
             echo "Found Android project at: $project_dir"
             test -f "$project_dir/gradlew" || { echo "::error::Missing gradlew"; exit 1; }
             test -f "$project_dir/app/build.gradle.kts" || { echo "::error::Missing app/build.gradle.kts"; exit 1; }
+            # Never overwrite the CI workflow with the one inside the legacy project.
             cp -a "$project_dir"/. ./
+            git restore --source=HEAD -- .github/workflows/build.yml
             rm -rf .import-src
             rm car-launcher-modified.zip
             git config user.name "github-actions[bot]"
