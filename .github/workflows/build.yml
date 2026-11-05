@@ -1,0 +1,80 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: car-launcher-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Import source ZIP once (if present)
+        id: prepare
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f car-launcher-modified.zip && ! -f settings.gradle.kts ]]; then
+            echo "Importing original working project into regular tracked files..."
+            mkdir -p .import-src
+            unzip -q car-launcher-modified.zip -d .import-src
+            test -f .import-src/car-launcher-main/settings.gradle.kts
+            test -f .import-src/car-launcher-main/gradlew
+            cp -a .import-src/car-launcher-main/. ./
+            rm -rf .import-src
+            rm car-launcher-modified.zip
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            if ! git diff --cached --quiet; then
+              git commit -m "chore: import launcher source as regular files"
+              git push
+            fi
+          fi
+          if [[ -f settings.gradle.kts && -f gradlew && -f app/build.gradle.kts ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Project source is not uploaded yet. Upload car-launcher-modified.zip to start the first build."
+          fi
+
+      - name: Set up Java 17
+        if: steps.prepare.outputs.ready == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        if: steps.prepare.outputs.ready == 'true'
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Accept Android SDK licenses
+        if: steps.prepare.outputs.ready == 'true'
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+
+      - name: Assemble debug APK
+        if: steps.prepare.outputs.ready == 'true'
+        run: bash gradlew assembleDebug --stacktrace --no-daemon
+
+      - name: Upload debug APK
+        if: steps.prepare.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: car-launcher-next-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 30
