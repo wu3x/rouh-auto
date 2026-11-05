@@ -1,0 +1,3 @@
+-keepattributes *Annotation*
+-keep class org.wpfy.carlauncher.data.** { *; }
+-keep class org.wpfy.carlauncher.model.** { *; }

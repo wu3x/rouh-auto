@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Arabic is the default language of this build (values/), so the launcher settings
+    appear in Arabic regardless of the head unit's system language.
+-->
+<resources>
+    <string name="app_name">Car Launcher</string>
+    <string name="settings_label">إعدادات Car Launcher</string>
+    <string name="media_label">وسائط Car Launcher</string>
+    <string name="notification_access_label">وصول Car Launcher إلى الإشعارات</string>
+
+    <!-- Settings: titles & sections -->
+    <string name="settings_title">الإعدادات</string>
+    <string name="settings_section_launcher">اللانشر</string>
+    <string name="settings_section_appearance">المظهر</string>
+    <string name="settings_section_media">الوسائط</string>
+    <string name="settings_section_navigation">الملاحة</string>
+    <string name="settings_section_system">النظام / التشخيص</string>
+
+    <!-- Settings: launcher -->
+    <string name="settings_home_app">تطبيق الشاشة الرئيسية</string>
+    <string name="settings_home_app_is_default">Car Launcher هو تطبيق الشاشة الرئيسية الافتراضي</string>
+    <string name="settings_home_app_choose">اختر Car Launcher كتطبيق للشاشة الرئيسية</string>
+    <string name="settings_start_on_boot">التشغيل عند الإقلاع</string>
+    <string name="settings_start_on_boot_summary">فتح اللانشر بعد اكتمال إقلاع أندرويد</string>
+    <string name="settings_startup_screen">شاشة البدء</string>
+    <string name="settings_navigation_rail">شريط التنقل</string>
+    <string name="settings_pinned_apps">التطبيقات المثبّتة</string>
+    <string name="settings_pinned_apps_summary">%1$d من %2$d مثبّتة · أدِرها من قائمة التطبيقات</string>
+
+    <!-- Settings: appearance -->
+    <string name="settings_theme">السمة</string>
+    <string name="settings_theme_dark">داكنة</string>
+    <string name="settings_text_size">حجم الخط</string>
+
+    <!-- Settings: media -->
+    <string name="settings_notification_access">الوصول إلى الإشعارات</string>
+    <string name="settings_notification_access_granted">مفعّل</string>
+    <string name="settings_notification_access_missing">غير مفعّل · مطلوب لأزرار التحكم بالوسائط والإشعارات</string>
+    <string name="settings_preferred_media_app">تطبيق الوسائط المفضّل</string>
+    <string name="settings_choose_app">اختر تطبيقًا</string>
+
+    <!-- Settings: navigation -->
+    <string name="settings_external_navigation_app">تطبيق الملاحة الخارجي</string>
+    <string name="settings_embedded_navigation">الملاحة المدمجة</string>
+    <string name="settings_embedded_navigation_choose_first">اختر تطبيق ملاحة أولًا</string>
+    <string name="settings_embedded_navigation_pending">جارٍ التحقق من توافق الشاشة</string>
+    <string name="settings_compatibility_mode">وضع التوافق</string>
+    <string name="settings_compatibility_mode_summary">حل بديل للشاشات التي تحتاج إلى سلوك الدمج القديم</string>
+
+    <!-- Settings: diagnostics -->
+    <string name="settings_diagnostics_version">الإصدار %1$s</string>
+    <string name="settings_diagnostics_android">أندرويد</string>
+    <string name="settings_diagnostics_architecture">المعمارية</string>
+    <string name="settings_diagnostics_display">الشاشة</string>
+    <string name="settings_diagnostics_permissions">الأذونات</string>
+    <string name="settings_diagnostics_copy">نسخ بيانات التشخيص</string>
+    <string name="settings_diagnostics_copy_summary">نسخ تفاصيل الجهاز واللانشر إلى الحافظة</string>
+    <string name="settings_diagnostics_copied">تم نسخ بيانات التشخيص</string>
+    <string name="diagnostics_android_value">أندرويد %1$s (API %2$d)</string>
+    <string name="diagnostics_permissions_value">%1$d/%2$d من أذونات التطبيق ممنوحة</string>
+    <string name="diagnostics_copy_abi">المعمارية: %1$s</string>
+    <string name="diagnostics_copy_display">الشاشة: %1$s</string>
+    <string name="diagnostics_copy_permissions">الأذونات: %1$s</string>
+    <string name="diagnostics_clip_label">بيانات تشخيص Car Launcher</string>
+
+    <!-- Settings: pickers & common -->
+    <string name="settings_none">بدون</string>
+    <string name="settings_none_summary">عدم استخدام تطبيق مفضّل</string>
+    <string name="settings_back">رجوع</string>
+    <string name="settings_selected">محدّد</string>
+    <string name="settings_selected_app_unavailable">التطبيق المحدّد غير متوفر</string>
+
+    <!-- Settings: option labels -->
+    <string name="startup_home">الرئيسية</string>
+    <string name="startup_apps">التطبيقات</string>
+    <string name="text_size_small">صغير</string>
+    <string name="text_size_standard">عادي</string>
+    <string name="text_size_large">كبير</string>
+    <string name="rail_left">يسار</string>
+    <string name="rail_right">يمين</string>
+    <string name="rail_bottom">أسفل</string>
+
+    <!-- Mini map -->
+    <string name="map_location_permission_needed">اسمح بالوصول إلى الموقع لعرض الخريطة</string>
+    <string name="map_gps_disabled">خدمة الموقع (GPS) متوقفة</string>
+    <string name="map_gps_active">GPS نشط</string>
+    <string name="map_waiting_for_gps">بانتظار إشارة GPS…</string>
+
+    <!-- Bluetooth media -->
+    <string name="bluetooth_media_label">موسيقى البلوتوث</string>
+    <string name="bluetooth_unknown_track">مقطع بلوتوث</string>
+
+    <!-- Navigation -->
+    <string name="nav_ready_title">جاهز للقيادة</string>
+    <string name="nav_ready_body">اختر وجهة لبدء الملاحة</string>
+    <string name="nav_search_destination">ابحث عن وجهة</string>
+    <string name="nav_arrived_title">وصلت إلى وجهتك</string>
+    <string name="nav_arrived_body">انتهى التوجيه</string>
+    <string name="nav_gps_title">GPS غير متاح</string>
+    <string name="nav_gps_body">بانتظار تحديد الموقع</string>
+    <string name="nav_provider_title">الملاحة غير متاحة</string>
+    <string name="nav_provider_body">تعذّر تشغيل خدمة الملاحة</string>
+    <string name="nav_route_unavailable_title">تعذّر إيجاد مسار</string>
+    <string name="nav_route_unavailable_body">اختر وجهة أخرى أو تحقق من الإنترنت</string>
+    <string name="nav_permission_title">مطلوب إذن الموقع</string>
+    <string name="nav_permission_body">اسمح بالوصول إلى الموقع لاستخدام الملاحة</string>
+    <string name="nav_unavailable_title">الملاحة غير متاحة</string>
+    <string name="nav_unavailable_body">تعذّر بدء الملاحة</string>
+    <string name="nav_try_again">حاول مرة أخرى</string>
+    <string name="nav_calculating_title">جارٍ حساب المسار…</string>
+    <string name="nav_calculating_body">لحظات من فضلك</string>
+    <string name="nav_cancel">إلغاء</string>
+    <string name="nav_then">ثم</string>
+    <string name="nav_stop">إيقاف الملاحة</string>
+    <string name="nav_routes">المسارات</string>
+    <string name="nav_search">بحث</string>
+    <string name="nav_places">الأماكن</string>
+
+    <!-- Navigation: destination search -->
+    <string name="nav_search_placeholder">ابحث عن مكان أو عنوان</string>
+    <string name="nav_search_hint">اكتب اسم المكان أو العنوان (حرفين على الأقل)</string>
+    <string name="nav_search_loading">جارٍ البحث…</string>
+    <string name="nav_search_empty">ما لقيت نتائج، جرّب كتابة ثانية</string>
+    <string name="nav_search_error">تعذّر البحث. تأكد من الاتصال بالإنترنت</string>
+    <string name="nav_voice_search">بحث صوتي</string>
+
+    <!-- Navigation: manoeuvres -->
+    <string name="maneuver_continue">استمر للأمام</string>
+    <string name="maneuver_turn_left">انعطف يسارًا</string>
+    <string name="maneuver_turn_right">انعطف يمينًا</string>
+    <string name="maneuver_slight_left">انعطف قليلًا يسارًا</string>
+    <string name="maneuver_slight_right">انعطف قليلًا يمينًا</string>
+    <string name="maneuver_sharp_left">انعطف بحدة يسارًا</string>
+    <string name="maneuver_sharp_right">انعطف بحدة يمينًا</string>
+    <string name="maneuver_uturn">استدر للخلف</string>
+    <string name="maneuver_merge">ادمج مع الطريق</string>
+    <string name="maneuver_exit_left">اسلك المخرج الأيسر</string>
+    <string name="maneuver_exit_right">اسلك المخرج الأيمن</string>
+    <string name="maneuver_roundabout">ادخل الدوّار</string>
+    <string name="maneuver_arrive">وصلت إلى وجهتك</string>
+
+    <!-- Onboarding -->
+    <string name="ob_setup_title">إعداد %1$s</string>
+    <string name="ob_setup_subtitle">أكمل أذونات أندرويد المطلوبة قبل استخدام اللانشر.</string>
+    <string name="ob_location_title">تحديد الموقع الدقيق</string>
+    <string name="ob_location_required">مطلوب للموقع والملاحة</string>
+    <string name="ob_granted">مفعّل</string>
+    <string name="ob_notification_title">الوصول إلى الإشعارات</string>
+    <string name="ob_notification_required">مطلوب لأزرار التحكم بالوسائط والإشعارات</string>
+    <string name="ob_home_title">تطبيق الشاشة الرئيسية الافتراضي</string>
+    <string name="ob_home_yes">Car Launcher هو تطبيق الشاشة الرئيسية الافتراضي</string>
+    <string name="ob_home_no">اختر Car Launcher كتطبيق افتراضي للشاشة الرئيسية</string>
+    <string name="ob_rail_title">أين تريد أن يظهر شريط التنقل؟</string>
+    <string name="ob_rail_subtitle">اليسار واليمين يستخدمان الشريط العمودي، والأسفل يستخدم الشريط الأفقي.</string>
+    <string name="ob_rail_left_desc">شريط عمودي على اليسار</string>
+    <string name="ob_rail_right_desc">شريط عمودي على اليمين</string>
+    <string name="ob_rail_bottom_desc">شريط أفقي أسفل الشاشة</string>
+    <string name="ob_finish">إنهاء الإعداد</string>
+    <string name="ob_continue">متابعة</string>
+    <string name="ob_selected">محدد</string>
+    <string name="ob_not_selected">غير محدد</string>
+    <string name="ob_complete">مكتمل</string>
+    <string name="ob_not_complete">غير مكتمل</string>
+
+    <!-- Apps -->
+    <string name="pin_limit_reached">يمكن تثبيت %1$d تطبيقات كحد أقصى. ألغِ تثبيت تطبيق أولًا.</string>
+</resources>
