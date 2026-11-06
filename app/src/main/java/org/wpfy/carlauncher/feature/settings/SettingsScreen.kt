@@ -28,6 +28,11 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Button
+import org.wpfy.carlauncher.feature.home.WelcomePreferences
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
@@ -192,6 +197,35 @@ private fun SettingsList(
     onCompatibilityModeChange: (Boolean) -> Unit,
     onCopyDiagnostics: () -> Unit,
 ) {
+    val context = LocalContext.current
+    var greetingEnabled by remember { mutableStateOf(WelcomePreferences.enabled(context)) }
+    var greetingName by remember { mutableStateOf(WelcomePreferences.name(context)) }
+    var editGreeting by remember { mutableStateOf(false) }
+    var nameDraft by remember { mutableStateOf(greetingName) }
+    if (editGreeting) {
+        AlertDialog(
+            onDismissRequest = { editGreeting = false },
+            title = { Text("اسم الترحيب") },
+            text = {
+                OutlinedTextField(
+                    value = nameDraft,
+                    onValueChange = { nameDraft = it.take(30) },
+                    label = { Text("الاسم") },
+                    singleLine = true,
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    greetingName = nameDraft.trim()
+                    WelcomePreferences.setName(context, greetingName)
+                    editGreeting = false
+                }) { Text("حفظ") }
+            },
+            dismissButton = {
+                TextButton(onClick = { editGreeting = false }) { Text("إلغاء") }
+            },
+        )
+    }
     val settings = state.settings
     val resources = LocalContext.current.resources
     val chooseApp = stringResource(R.string.settings_choose_app)
@@ -250,6 +284,33 @@ private fun SettingsList(
                     state.pinnedAppCount,
                     MaxPinnedApps,
                 ),
+            )
+
+            settingRow(
+                title = "الترحيب عند التشغيل",
+                subtitle = "عرض رسالة ترحيبية عند فتح اللانشر",
+                onClick = {
+                    greetingEnabled = !greetingEnabled
+                    WelcomePreferences.setEnabled(context, greetingEnabled)
+                },
+                trailing = {
+                    CarSwitch(
+                        checked = greetingEnabled,
+                        onCheckedChange = {
+                            greetingEnabled = it
+                            WelcomePreferences.setEnabled(context, it)
+                        },
+                    )
+                },
+            )
+            settingRow(
+                title = "تغيير اسم الترحيب",
+                subtitle = "أهلاً $greetingName",
+                onClick = {
+                    nameDraft = greetingName
+                    editGreeting = true
+                },
+                showChevron = true,
             )
 
             section(resources.getString(R.string.settings_section_appearance))
