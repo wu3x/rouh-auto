@@ -123,7 +123,10 @@ fun SettingsScreen(
                 onOpenNavigationApp = { panel = SettingsPanel.NavigationApp.name },
                 onCompatibilityModeChange = onCompatibilityModeChange,
                 onCopyDiagnostics = onCopyDiagnostics,
+                onOpenMaintenance = { panel = SettingsPanel.Maintenance.name },
             )
+
+            SettingsPanel.Maintenance -> MaintenanceScreen(onBack = { panel = SettingsPanel.Main.name })
 
             SettingsPanel.StartupScreen -> OptionPicker(
                 title = stringResource(R.string.settings_startup_screen),
@@ -196,6 +199,7 @@ private fun SettingsList(
     onOpenNavigationApp: () -> Unit,
     onCompatibilityModeChange: (Boolean) -> Unit,
     onCopyDiagnostics: () -> Unit,
+    onOpenMaintenance: () -> Unit,
 ) {
     val context = LocalContext.current
     var greetingEnabled by remember { mutableStateOf(WelcomePreferences.enabled(context)) }
@@ -369,6 +373,12 @@ private fun SettingsList(
             )
 
             section(resources.getString(R.string.settings_section_system))
+            settingRow(
+                title = "صيانة النظام",
+                subtitle = "التخزين والذاكرة • ملفات APK • اكتشاف المكررات وحذفها بموافقتك",
+                onClick = onOpenMaintenance,
+                showChevron = true,
+            )
             settingRow(
                 title = "Car Launcher",
                 subtitle = resources.getString(R.string.settings_diagnostics_version, diagnostics.appVersion),
@@ -597,6 +607,7 @@ data class DeviceDiagnostics(
 
 private enum class SettingsPanel {
     Main,
+    Maintenance,
     StartupScreen,
     RailPosition,
     TextSize,
