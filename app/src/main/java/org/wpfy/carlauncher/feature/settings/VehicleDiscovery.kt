@@ -19,14 +19,14 @@ internal data class VehicleReport(val findings: List<VehicleFinding>) {
 internal suspend fun discoverVehicle(context: Context): VehicleReport = withContext(Dispatchers.IO) {
     val results = mutableListOf<VehicleFinding>()
     val pm = context.packageManager
-    val keywords = listOf("canbus", "canbox", "mcu", "obd", "vehicle", "carservice", "carinfo", "tbox", "zlink", "syu.ms", "com.microntek", "com.ts")
+    val keywords = listOf("canbus", "canbox", "mcu", "obd", "vehicle", "carservice", "carinfo", "tbox", "syu.ms", "com.microntek")
     @Suppress("DEPRECATION")
     val packages = pm.getInstalledPackages(PackageManager.GET_SERVICES or PackageManager.GET_PROVIDERS)
     packages.forEach { pkg ->
         val name = pkg.packageName
         val services = pkg.services.orEmpty().map { it.name }
         val providers = pkg.providers.orEmpty().map { it.name }
-        val match = (listOf(name) + services + providers).any { part -> keywords.any { key -> part.contains(key, ignoreCase = true) } }
+        val match = !name.startsWith("com.google.") && !name.startsWith("com.gold.android.") && !name.startsWith("com.adups.") && (listOf(name) + services + providers).any { part -> keywords.any { key -> part.contains(key, ignoreCase = true) } }
         if (match && name != context.packageName) {
             results.add(VehicleFinding("احتمال اتصال", name, "تطبيق أو خدمة مرتبطة بالسيارة • خدمات: ${services.size} • مزودات: ${providers.size}. وجودها لا يثبت توفر بيانات CAN."))
         }
