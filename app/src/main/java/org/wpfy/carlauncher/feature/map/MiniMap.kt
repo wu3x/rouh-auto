@@ -295,7 +295,7 @@ fun MiniMap(
         )
 
         val warning = location.statusMessage()
-        val statusText = warning ?: if (sample != null) stringResource(R.string.map_gps_active) else null
+        val statusText = warning ?: if (sample != null) "GPS متصل" else "ندور على إشارة GPS..."
         if (statusText != null) {
             Surface(
                 modifier = Modifier
@@ -357,9 +357,9 @@ private fun LocationSample.ageMillis(nowElapsedNanos: Long): Long {
 @Composable
 private fun MiniMapLocation.statusMessage(): String? {
     return when {
-        !status.permissionGranted -> stringResource(R.string.map_location_permission_needed)
-        !status.anyProviderEnabled -> stringResource(R.string.map_gps_disabled)
-        isStale -> stringResource(R.string.map_waiting_for_gps)
+        !status.permissionGranted -> "فعّل إذن الموقع عشان تشتغل الخريطة"
+        !status.anyProviderEnabled -> "ما لقينا GPS، تأكد من اتصاله"
+        isStale -> "ندور على إشارة GPS..."
         else -> null
     }
 }
