@@ -52,6 +52,8 @@ class AppsStateHolder(
         launcher.launch(app)
     }
 
+    fun uninstall(app: LauncherApp) { launcher.uninstall(app) }
+
     fun openAppInfo(app: LauncherApp) {
         launcher.openAppInfo(app)
     }
