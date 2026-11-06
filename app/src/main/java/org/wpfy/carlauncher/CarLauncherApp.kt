@@ -5,6 +5,21 @@ import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import org.wpfy.carlauncher.feature.home.WelcomePreferences
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -32,6 +47,19 @@ import org.wpfy.carlauncher.shell.rememberShellState
 @Composable
 fun CarLauncherApp() {
     val context = LocalContext.current
+    var welcomeVisible by remember { mutableStateOf(WelcomePreferences.enabled(context)) }
+    var welcomeLetters by remember { mutableStateOf(0) }
+    val welcomeText = remember(context) { "أهلاً "+WelcomePreferences.name(context) }
+    LaunchedEffect(Unit) {
+        if (welcomeVisible) {
+            for (i in 1..welcomeText.length) {
+                welcomeLetters = i
+                delay(85)
+            }
+            delay(1300)
+            welcomeVisible = false
+        }
+    }
     val settingsStateHolder = rememberSettingsStateHolder()
     val settingsState = settingsStateHolder.uiState
     val mediaRepository = remember(context.applicationContext) {
@@ -53,6 +81,7 @@ fun CarLauncherApp() {
     }
 
     CarTheme(textScale = settingsState.settings.textSizePreset.scale) {
+        Box(modifier = Modifier.fillMaxSize()) {
         if (settingsState.isLoading) {
             Box(
                 modifier = Modifier
@@ -100,6 +129,28 @@ fun CarLauncherApp() {
                     else -> PlaceholderDestination(destination)
                 }
             }
+        }
+        if (welcomeVisible && !settingsState.isLoading && settingsState.settings.onboardingCompleted) {
+            Box(
+                modifier = Modifier.fillMaxSize().background(Color.Black),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = welcomeText.take(welcomeLetters),
+                        color = Color(0xFFF4F4F4),
+                        fontSize = 42.sp,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Text(
+                        text = "CAR LAUNCHER",
+                        color = Color(0xFF777F8C),
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 18.dp),
+                    )
+                }
+            }
+        }
         }
     }
 }
