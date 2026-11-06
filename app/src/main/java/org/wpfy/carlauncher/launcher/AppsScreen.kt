@@ -41,6 +41,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.PushPin
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Delete
 import org.wpfy.carlauncher.design.component.CarGridItem
 import org.wpfy.carlauncher.design.component.CarHeader
 import org.wpfy.carlauncher.design.component.CarSearchEmptyState
@@ -66,6 +67,7 @@ fun AppsRoute(onOpenSettings: () -> Unit) {
         onAppClick = stateHolder::launch,
         onTogglePinned = stateHolder::togglePinned,
         onOpenAppInfo = stateHolder::openAppInfo,
+        onUninstall = stateHolder::uninstall,
         onOpenSettings = onOpenSettings,
         iconLoader = stateHolder::loadIcon,
     )
@@ -78,6 +80,7 @@ fun AppsScreen(
     onAppClick: (LauncherApp) -> Unit,
     onTogglePinned: (LauncherApp) -> Unit,
     onOpenAppInfo: (LauncherApp) -> Unit,
+    onUninstall: (LauncherApp) -> Unit,
     onOpenSettings: () -> Unit,
     iconLoader: suspend (LauncherApp) -> ImageBitmap?,
 ) {
@@ -158,23 +161,7 @@ fun AppsScreen(
                                     onLongClick = { contextMenuAppKey = app.stableKey },
                                 ) {
                                     LauncherAppIcon(app = app, iconLoader = iconLoader)
-                                    IconButton(
-                                        onClick = { onTogglePinned(app) },
-                                        modifier = Modifier
-                                            .align(Alignment.TopEnd)
-                                            .size(40.dp),
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.PushPin,
-                                            contentDescription = if (state.isPinned(app)) "Unpin" else "Pin",
-                                            modifier = Modifier.size(24.dp),
-                                            tint = if (state.isPinned(app)) {
-                                                CarColors.AccentMuted
-                                            } else {
-                                                CarColors.TextSecondary
-                                            },
-                                        )
-                                    }
+
                                 }
 
                                 AppContextMenu(
@@ -188,6 +175,10 @@ fun AppsScreen(
                                     onOpenAppInfo = {
                                         contextMenuAppKey = null
                                         onOpenAppInfo(app)
+                                    },
+                                    onUninstall = {
+                                        contextMenuAppKey = null
+                                        onUninstall(app)
                                     },
                                 )
                             }
@@ -239,13 +230,14 @@ private fun AppContextMenu(
     onDismiss: () -> Unit,
     onTogglePinned: () -> Unit,
     onOpenAppInfo: () -> Unit,
+    onUninstall: () -> Unit,
 ) {
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismiss,
     ) {
         DropdownMenuItem(
-            text = { Text(if (isPinned) "Unpin" else "Pin") },
+            text = { Text(if (isPinned) "إزالة التثبيت" else "تثبيت") },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Rounded.PushPin,
@@ -255,7 +247,14 @@ private fun AppContextMenu(
             onClick = onTogglePinned,
         )
         DropdownMenuItem(
-            text = { Text("App info") },
+            text = { Text("حذف") },
+            leadingIcon = {
+                Icon(imageVector = Icons.Rounded.Delete, contentDescription = null)
+            },
+            onClick = onUninstall,
+        )
+        DropdownMenuItem(
+            text = { Text("لمحة") },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Rounded.Info,
