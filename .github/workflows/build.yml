@@ -91,6 +91,38 @@ jobs:
         if: steps.prepare.outputs.ready == 'true'
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
+      - name: Install private Thmanyah fonts for APK build
+        if: steps.prepare.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p app/src/main/res/font
+          # Private release assets are fetched with the repository's GitHub token.
+          # Do not commit font files to source control.
+          if gh release download font-assets --pattern 'Thmanyah-Font-Family.zip' --dir /tmp --clobber; then
+            python3 - <<'PY'
+          import zipfile, pathlib
+          archive = zipfile.ZipFile('/tmp/Thmanyah-Font-Family.zip')
+          out = pathlib.Path('app/src/main/res/font')
+          for weight in ('Light', 'Regular', 'Medium', 'Bold', 'Black'):
+              suffix = f'thmanyahsans-{weight}.otf'
+              matches = [p for p in archive.namelist() if p.lower().endswith('/otf/' + suffix.lower()) and not p.startswith('__MACOSX/')]
+              if len(matches) != 1:
+                  raise SystemExit(f'Missing unique font file: {suffix}')
+              (out / f'thmanyah_{weight.lower()}.otf').write_bytes(archive.read(matches[0]))
+          print('Installed private Thmanyah Sans weights into APK resources.')
+          PY
+          else
+            echo "::notice::Private font-assets release not found. Using CI system font fallback until uploaded."
+            fallback="$(fc-match -f '%{file}' 'DejaVu Sans' | head -n 1)"
+            test -s "$fallback"
+            for weight in light regular medium bold black; do
+              cp "$fallback" "app/src/main/res/font/thmanyah_${weight}.ttf"
+            done
+          fi
+
       - name: Assemble debug APK
         if: steps.prepare.outputs.ready == 'true'
         run: bash gradlew assembleDebug --stacktrace --no-daemon
