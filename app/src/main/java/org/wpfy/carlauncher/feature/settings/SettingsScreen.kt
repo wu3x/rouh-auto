@@ -124,9 +124,11 @@ fun SettingsScreen(
                 onCompatibilityModeChange = onCompatibilityModeChange,
                 onCopyDiagnostics = onCopyDiagnostics,
                 onOpenMaintenance = { panel = SettingsPanel.Maintenance.name },
+                onOpenVehicleDiscovery = { panel = SettingsPanel.VehicleDiscovery.name },
             )
 
             SettingsPanel.Maintenance -> MaintenanceScreen(onBack = { panel = SettingsPanel.Main.name })
+            SettingsPanel.VehicleDiscovery -> VehicleDiscoveryScreen(onBack = { panel = SettingsPanel.Main.name })
 
             SettingsPanel.StartupScreen -> OptionPicker(
                 title = stringResource(R.string.settings_startup_screen),
@@ -200,6 +202,7 @@ private fun SettingsList(
     onCompatibilityModeChange: (Boolean) -> Unit,
     onCopyDiagnostics: () -> Unit,
     onOpenMaintenance: () -> Unit,
+    onOpenVehicleDiscovery: () -> Unit,
 ) {
     val context = LocalContext.current
     var greetingEnabled by remember { mutableStateOf(WelcomePreferences.enabled(context)) }
@@ -373,6 +376,12 @@ private fun SettingsList(
             )
 
             section(resources.getString(R.string.settings_section_system))
+            settingRow(
+                title = "اكتشاف اتصال السيارة",
+                subtitle = "فحص خدمات CANBUS وواجهات USB والبلوتوث بدون تغيير أي شيء بالسيارة",
+                onClick = onOpenVehicleDiscovery,
+                showChevron = true,
+            )
             settingRow(
                 title = "صيانة النظام",
                 subtitle = "التخزين والذاكرة • ملفات APK • اكتشاف المكررات وحذفها بموافقتك",
@@ -608,6 +617,7 @@ data class DeviceDiagnostics(
 private enum class SettingsPanel {
     Main,
     Maintenance,
+    VehicleDiscovery,
     StartupScreen,
     RailPosition,
     TextSize,
