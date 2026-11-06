@@ -125,10 +125,12 @@ fun SettingsScreen(
                 onCopyDiagnostics = onCopyDiagnostics,
                 onOpenMaintenance = { panel = SettingsPanel.Maintenance.name },
                 onOpenVehicleDiscovery = { panel = SettingsPanel.VehicleDiscovery.name },
+                onOpenSystemTest = { panel = SettingsPanel.SystemTest.name },
             )
 
             SettingsPanel.Maintenance -> MaintenanceScreen(onBack = { panel = SettingsPanel.Main.name })
             SettingsPanel.VehicleDiscovery -> VehicleDiscoveryScreen(onBack = { panel = SettingsPanel.Main.name })
+            SettingsPanel.SystemTest -> SystemTestScreen(onBack = { panel = SettingsPanel.Main.name })
 
             SettingsPanel.StartupScreen -> OptionPicker(
                 title = stringResource(R.string.settings_startup_screen),
@@ -203,6 +205,7 @@ private fun SettingsList(
     onCopyDiagnostics: () -> Unit,
     onOpenMaintenance: () -> Unit,
     onOpenVehicleDiscovery: () -> Unit,
+    onOpenSystemTest: () -> Unit,
 ) {
     val context = LocalContext.current
     var greetingEnabled by remember { mutableStateOf(WelcomePreferences.enabled(context)) }
@@ -348,34 +351,13 @@ private fun SettingsList(
                 showChevron = true,
             )
 
-            section(resources.getString(R.string.settings_section_navigation))
+            section(resources.getString(R.string.settings_section_system))
             settingRow(
-                title = resources.getString(R.string.settings_external_navigation_app),
-                subtitle = navigationLabel,
-                onClick = onOpenNavigationApp,
+                title = "اختبار النظام",
+                subtitle = "قياس أداء المعالج والذاكرة وسرعة التخزين بأرقام فعلية",
+                onClick = onOpenSystemTest,
                 showChevron = true,
             )
-            settingRow(
-                title = resources.getString(R.string.settings_embedded_navigation),
-                subtitle = if (settings.navigationAppKey == null) {
-                    resources.getString(R.string.settings_embedded_navigation_choose_first)
-                } else {
-                    resources.getString(R.string.settings_embedded_navigation_pending)
-                },
-            )
-            settingRow(
-                title = resources.getString(R.string.settings_compatibility_mode),
-                subtitle = resources.getString(R.string.settings_compatibility_mode_summary),
-                onClick = { onCompatibilityModeChange(!settings.navigationCompatibilityMode) },
-                trailing = {
-                    CarSwitch(
-                        checked = settings.navigationCompatibilityMode,
-                        onCheckedChange = onCompatibilityModeChange,
-                    )
-                },
-            )
-
-            section(resources.getString(R.string.settings_section_system))
             settingRow(
                 title = "اكتشاف اتصال السيارة",
                 subtitle = "فحص خدمات CANBUS وواجهات USB والبلوتوث بدون تغيير أي شيء بالسيارة",
@@ -618,6 +600,7 @@ private enum class SettingsPanel {
     Main,
     Maintenance,
     VehicleDiscovery,
+    SystemTest,
     StartupScreen,
     RailPosition,
     TextSize,
