@@ -16,6 +16,14 @@ class AppLauncher(context: Context) {
         )
     }.isSuccess
 
+    fun uninstall(app: LauncherApp): Boolean = runCatching {
+        appContext.startActivity(
+            Intent(Intent.ACTION_DELETE, Uri.parse("package:${app.packageName}")).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            },
+        )
+    }.isSuccess
+
     fun openAppInfo(app: LauncherApp): Boolean = runCatching {
         appContext.startActivity(
             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
