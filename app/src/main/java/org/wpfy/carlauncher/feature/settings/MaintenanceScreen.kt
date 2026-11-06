@@ -113,9 +113,7 @@ fun MaintenanceScreen(onBack: () -> Unit) {
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                         })
                     }) { Text("السماح بالوصول لمجلد") }
-                    Button(onClick = { scan() }, enabled = folder != null && !busy) {
-                        Text(if (busy) "اصبر شوي، نفحص لك..." else "فحص الآن")
-                    }
+                    AnimatedScanButton(busy = busy, finished = scanFinished, enabled = folder != null, onClick = { scan() })
                 }
                 if (folder != null) Text("المجلد المحدد: ${folder?.lastPathSegment.orEmpty()}")
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
@@ -143,7 +141,7 @@ fun MaintenanceScreen(onBack: () -> Unit) {
             title = { Text("تأكيد الحذف") },
             text = { Text("هل تريد حذف ${file.name} نهائيًا؟ تأكد أنه ليس ملفًا تحتاجه.") },
             confirmButton = {
-                TextButton(onClick = {
+                HoldToDeleteButton(onConfirmed = {
                     scope.launch {
                         val deleted = withContext(Dispatchers.IO) {
                             runCatching { DocumentsContract.deleteDocument(context.contentResolver, file.uri) }.getOrDefault(false)
@@ -153,7 +151,7 @@ fun MaintenanceScreen(onBack: () -> Unit) {
                         pendingDelete = null
                         refresh++
                     }
-                }) { Text("حذف الملف") }
+                })
             },
             dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text("إلغاء") } }
         )
