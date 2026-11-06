@@ -54,5 +54,6 @@ internal suspend fun discoverVehicle(context: Context): VehicleReport = withCont
     if (results.none { it.group == "احتمال اتصال" }) {
         results.add(VehicleFinding("النتيجة", "ما لقينا اتصال سيارة مؤكد", "الفحص يكتشف الواجهات التي يسمح أندرويد برؤيتها. ممكن تكون وحدة CAN مخفية عن التطبيقات أو غير موصولة."))
     }
+    results.addAll(passiveVehicleProbes(context))
     VehicleReport(results)
 }
