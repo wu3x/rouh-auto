@@ -35,6 +35,7 @@ fun MaintenanceScreen(onBack: () -> Unit) {
     val prefs = remember { context.getSharedPreferences("maintenance", Context.MODE_PRIVATE) }
     var folder by remember { mutableStateOf(prefs.getString("folder", null)?.let(Uri::parse)) }
     var busy by remember { mutableStateOf(false) }
+    var scanFinished by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf<ScanResult?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var pendingDelete by remember { mutableStateOf<FoundFile?>(null) }
@@ -66,11 +67,12 @@ fun MaintenanceScreen(onBack: () -> Unit) {
     fun scan() {
         val selected = folder ?: return
         busy = true
+        scanFinished = false
         error = null
         scope.launch {
             runCatching { withContext(Dispatchers.IO) { scanFolder(context, selected) } }
-                .onSuccess { result = it }
-                .onFailure { error = "تعذر فحص المجلد: ${it.localizedMessage}" }
+                .onSuccess { result = it; scanFinished = true }
+                .onFailure { error = "ما قدرنا نفحص المجلد: ${it.localizedMessage}" }
             busy = false
             refresh++
         }
@@ -112,12 +114,13 @@ fun MaintenanceScreen(onBack: () -> Unit) {
                         })
                     }) { Text("السماح بالوصول لمجلد") }
                     Button(onClick = { scan() }, enabled = folder != null && !busy) {
-                        Text(if (busy) "جارٍ الفحص..." else "فحص الآن")
+                        Text(if (busy) "اصبر شوي، نفحص لك..." else "فحص الآن")
                     }
                 }
                 if (folder != null) Text("المجلد المحدد: ${folder?.lastPathSegment.orEmpty()}")
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 result?.let {
+                    Text(if (it.files.isEmpty()) "أمورك طيبة، ما لقينا ملفات تحتاج مراجعة" else "خلصنا الفحص، وهذي الملفات اللي تستاهل تراجعها")
                     Text("تم فحص ${it.scanned} ملف • النتائج: ${it.files.size}")
                     if (it.truncated) Text("تم إيقاف الفحص عند 3000 ملف لحماية أداء الشاشة.")
                 }
@@ -146,7 +149,7 @@ fun MaintenanceScreen(onBack: () -> Unit) {
                             runCatching { DocumentsContract.deleteDocument(context.contentResolver, file.uri) }.getOrDefault(false)
                         }
                         if (deleted) result = result?.copy(files = result!!.files.filterNot { it.uri == file.uri })
-                        else error = "تعذر الحذف. قد يكون المجلد للقراءة فقط."
+                        else error = "ما قدرنا نحذف الملف، تأكد من صلاحية المجلد."
                         pendingDelete = null
                         refresh++
                     }
