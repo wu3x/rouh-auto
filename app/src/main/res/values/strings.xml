@@ -4,10 +4,10 @@
     appear in Arabic regardless of the head unit's system language.
 -->
 <resources>
-    <string name="app_name">Car Launcher</string>
-    <string name="settings_label">إعدادات Car Launcher</string>
-    <string name="media_label">وسائط Car Launcher</string>
-    <string name="notification_access_label">وصول Car Launcher إلى الإشعارات</string>
+    <string name="app_name">ROUH Auto</string>
+    <string name="settings_label">إعدادات ROUH Auto</string>
+    <string name="media_label">وسائط ROUH Auto</string>
+    <string name="notification_access_label">وصول ROUH Auto إلى الإشعارات</string>
 
     <!-- Settings: titles & sections -->
     <string name="settings_title">الإعدادات</string>
@@ -19,8 +19,8 @@
 
     <!-- Settings: launcher -->
     <string name="settings_home_app">تطبيق الشاشة الرئيسية</string>
-    <string name="settings_home_app_is_default">Car Launcher هو تطبيق الشاشة الرئيسية الافتراضي</string>
-    <string name="settings_home_app_choose">اختر Car Launcher كتطبيق للشاشة الرئيسية</string>
+    <string name="settings_home_app_is_default">ROUH Auto هو تطبيق الشاشة الرئيسية الافتراضي</string>
+    <string name="settings_home_app_choose">اختر ROUH Auto كتطبيق للشاشة الرئيسية</string>
     <string name="settings_start_on_boot">التشغيل عند الإقلاع</string>
     <string name="settings_start_on_boot_summary">فتح اللانشر بعد اكتمال إقلاع أندرويد</string>
     <string name="settings_startup_screen">شاشة البدء</string>
@@ -62,7 +62,7 @@
     <string name="diagnostics_copy_abi">المعمارية: %1$s</string>
     <string name="diagnostics_copy_display">الشاشة: %1$s</string>
     <string name="diagnostics_copy_permissions">الأذونات: %1$s</string>
-    <string name="diagnostics_clip_label">بيانات تشخيص Car Launcher</string>
+    <string name="diagnostics_clip_label">بيانات تشخيص ROUH Auto</string>
 
     <!-- Settings: pickers & common -->
     <string name="settings_none">بدون</string>
@@ -149,8 +149,8 @@
     <string name="ob_notification_title">الوصول إلى الإشعارات</string>
     <string name="ob_notification_required">مطلوب لأزرار التحكم بالوسائط والإشعارات</string>
     <string name="ob_home_title">تطبيق الشاشة الرئيسية الافتراضي</string>
-    <string name="ob_home_yes">Car Launcher هو تطبيق الشاشة الرئيسية الافتراضي</string>
-    <string name="ob_home_no">اختر Car Launcher كتطبيق افتراضي للشاشة الرئيسية</string>
+    <string name="ob_home_yes">ROUH Auto هو تطبيق الشاشة الرئيسية الافتراضي</string>
+    <string name="ob_home_no">اختر ROUH Auto كتطبيق افتراضي للشاشة الرئيسية</string>
     <string name="ob_rail_title">أين تريد أن يظهر شريط التنقل؟</string>
     <string name="ob_rail_subtitle">اليسار واليمين يستخدمان الشريط العمودي، والأسفل يستخدم الشريط الأفقي.</string>
     <string name="ob_rail_left_desc">شريط عمودي على اليسار</string>
