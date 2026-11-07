@@ -1,41 +1,117 @@
+<div align="center">
+
+<img src="app/src/main/res/drawable-nodpi/rouh_auto_512.png" width="180" alt="ROUH Auto — knight holding a white cat" />
+
 # ROUH Auto
 
-ROUH Auto is a landscape-first Android home screen for aftermarket car head units. It is designed for Android 9 (API 28) and newer, with a large-touch-target Compose UI suitable for dashboard use.
+### لانشر عربي لشاشات السيارات بنظام أندرويد
+**A modern, landscape-first Android car launcher**
 
-## Current features
+[![Android](https://img.shields.io/badge/Android-9%2B-3DDC84?logo=android&logoColor=white)](https://developer.android.com/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-Compose-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![UI](https://img.shields.io/badge/UI-Arabic%20%2F%20RTL-1787D4)](#-features--المميزات)
+[![Build](https://github.com/wu3x/car-launcher-next/actions/workflows/build.yml/badge.svg)](https://github.com/wu3x/car-launcher-next/actions/workflows/build.yml)
+[![Status](https://img.shields.io/badge/Status-Active%20development-F5A623)](#-project-status--حالة-المشروع)
 
-- Home dashboard with status, navigation-preview, and media surfaces
-- App library with search, list/grid views, pinning, and quick launch
-- Multiple active media sessions with sticky source selection
-- Swipeable media sources, artwork backgrounds, progress, and playback controls
-- Expanded player with supported shuffle, repeat, and favorite controls
-- Driving-oriented notification list
-- Dark/light appearance, text sizing, startup-screen, and launcher settings
-- Optional launch-at-boot behavior
+[**⬇️ Download APK / تحميل التطبيق**](https://github.com/wu3x/car-launcher-next/releases/tag/latest-test) ·
+[**🛠️ Build status / حالة البناء**](https://github.com/wu3x/car-launcher-next/actions/workflows/build.yml) ·
+[**📂 Source / الملفات**](app/src/main/java/org/wpfy/carlauncher)
 
-## Build
+</div>
 
-Requirements:
+---
 
-- JDK 17
-- Android SDK with API 36 installed
+## ✨ About / عن التطبيق
 
-Build the public debug APK:
+**ROUH Auto** واجهة رئيسية مصممة لشاشات السيارات الصينية وشاشات أندرويد البديلة، مع تركيز على سهولة اللمس، الاتجاه الأفقي، والتجربة العربية.
+
+ROUH Auto is a native Android home-screen replacement built with **Kotlin + Jetpack Compose** for aftermarket head units. It is optimized for landscape layouts and dashboard-friendly controls.
+
+> [!IMPORTANT]
+> **تطبيق تجريبي قيد التطوير.** بعض الوظائف تعتمد على نوع الشاشة وصلاحيات أندرويد وتطبيقات المصنع. التطبيق لا يقرأ أعطال السيارة أو بيانات CANBUS تلقائيًا دون واجهة متوافقة.
+
+## 🚘 Features / المميزات
+
+| الميزة | الوصف |
+| :--- | :--- |
+| 🏠 **لوحة رئيسية** | واجهة أفقية مناسبة لشاشة السيارة، مع عناصر الحالة والموسيقى والخريطة المصغّرة |
+| 🎵 **مشغل الوسائط** | يعرض جلسات الوسائط المتاحة ومعلومات الأغاني وأزرار التحكم عند دعم التطبيق المصدر |
+| 📱 **مكتبة التطبيقات** | بحث، فتح سريع، عرض التطبيقات، وتثبيت المفضلة |
+| 🗺️ **خريطة مصغّرة** | عرض موقع وخريطة داخل الواجهة؛ يتطلب توفر GPS واتصال مناسب |
+| 🔔 **الإشعارات** | عرض إشعارات التطبيقات بعد منح صلاحية الوصول |
+| 🧪 **اختبار النظام** | فحوصات ومؤشرات محلية لأداء الجهاز؛ النتائج تخص شاشة أندرويد وليست تشخيصًا ميكانيكيًا |
+| 🧹 **صيانة النظام** | معلومات التخزين والذاكرة، وفحص الملفات داخل المجلدات التي يمنحها المستخدم صلاحية |
+| 🚗 **اكتشاف اتصال السيارة** | استكشاف **للقراءة فقط** للخدمات والواجهات المتاحة؛ لا يرسل أوامر لوحدات السيارة |
+| ⚙️ **التخصيص** | إعدادات المظهر والواجهة والتحية وأسلوب الاستخدام |
+
+### 🎨 Interface / الواجهة
+
+التطبيق يستخدم تصميمًا داكنًا بلمسات لونية، وعناصر لمس كبيرة، ودعمًا للغة العربية واتجاه RTL.
+
+**Actual screenshots / صور حقيقية من التطبيق**
+
+> 📸 **قريبًا:** ستُضاف لقطات فعلية من شاشة السيارة أو المحاكي بعد اعتمادها. لم نضع صورًا تخيلية على أنها لقطات من التطبيق.
+
+| Home / الرئيسية | System test / اختبار النظام | Settings / الإعدادات |
+| :---: | :---: | :---: |
+| لقطة فعلية قريبًا | لقطة فعلية قريبًا | لقطة فعلية قريبًا |
+
+## 📲 Installation / التثبيت
+
+1. افتح [**Latest Test Release**](https://github.com/wu3x/car-launcher-next/releases/tag/latest-test).
+2. نزّل ملف **APK** من قسم **Assets**.
+3. ثبّته على شاشة أندرويد، واسمح بالتثبيت من المصدر عند الحاجة.
+4. امنح الأذونات المطلوبة للميزات التي ترغب باستخدامها، واختر **ROUH Auto** كتطبيق الشاشة الرئيسية إذا رغبت.
+
+**Compatibility / التوافق:** Android **9+** (API 28+). صُمم أساسًا للشاشات الأفقية؛ بعض خصائص البلوتوث وMCU وCANBUS تختلف حسب المصنع.
+
+> [!NOTE]
+> **Bluetooth audio:** عرض اسم الأغنية لا يعني بالضرورة تفعيل مسار الصوت. بعض الشاشات تتطلب تطبيق «موسيقى البلوتوث» الأصلي لتشغيل الصوت عبر MCU.
+
+## 🧰 Tech stack / التقنيات
+
+| Component | Technology |
+| :--- | :--- |
+| Language | Kotlin |
+| UI | Jetpack Compose / Material 3 |
+| Platform | Android, minSdk 28 |
+| Persistence | Android DataStore / local preferences |
+| Background tasks | Kotlin Coroutines |
+| Build | Gradle + GitHub Actions |
+| Distribution | GitHub Releases (test APK) |
+
+## 🛠️ Build from source / بناء المشروع
+
+Requirements: **JDK 17**, Android SDK with the configured compile SDK, and Gradle wrapper.
 
 ```bash
 ./gradlew assembleDebug
 ```
 
-The APK is generated under `app/build/outputs/apk/debug/`. Build artifacts, signing keys, research APKs, private planning, and paid-edition work are intentionally excluded from this repository.
+Output: `app/build/outputs/apk/debug/`
 
-## Status
+> [!WARNING]
+> The GitHub Actions build obtains **Thmanyah Sans** font resources from a separate private release. Those font binaries are **not included in the repository**. A local build may require compatible font resources or adjustments to the font configuration.
 
-The app is under active development. The standard public build does not include privileged system-app embedding or paid navigation code. Hardware-specific work for YT5760D/AC8257 head units is tracked privately until it is ready for public release.
+## 🧭 Project status / حالة المشروع
 
-## Attribution
+- **In development:** UI, media integration, system utilities, and vehicle discovery are evolving.
+- **Hardware-dependent:** Car data discovery is read-only and does **not** guarantee access to BCM, CANBUS, door status, or fault codes.
+- **No automatic vehicle changes:** No commands are intentionally sent to car control modules by the discovery feature.
+- **Testing:** Validate on the actual head unit; an Android emulator cannot reproduce manufacturer MCU integrations.
 
-ROUH Auto started from [OpenLauncher](https://github.com/vickoc911/openlauncher) and has since substantially diverged.
+## 🤝 Credits & licensing / الحقوق
 
-## License
+ROUH Auto began from [OpenLauncher](https://github.com/vickoc911/openlauncher) and has since substantially diverged.
 
-Licensing is still under provenance review. No license is granted by this repository at this time.
+**License:** Licensing and upstream provenance remain under review. Do not assume a license grant from this repository until the review is complete.
+
+---
+
+<div align="center">
+
+**ROUH Auto — Built for the road. Designed for your dashboard.**
+
+<sub>Made with Kotlin • Jetpack Compose • Android</sub>
+
+</div>
