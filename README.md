@@ -23,7 +23,7 @@
 
 ## ✨ About / عن التطبيق
 
-**ROUH Auto** واجهة رئيسية مصممة لشاشات السيارات الصينية وشاشات أندرويد البديلة، مع تركيز على سهولة اللمس، الاتجاه الأفقي، والتجربة العربية.
+**ROUH Auto** واجهة رئيسية مصممة لشاشات السيارات بنظام أندرويد البديلة، مع تركيز على سهولة اللمس، الاتجاه الأفقي، والتجربة العربية.
 
 ROUH Auto is a native Android home-screen replacement built with **Kotlin + Jetpack Compose** for aftermarket head units. It is optimized for landscape layouts and dashboard-friendly controls.
 
@@ -100,11 +100,6 @@ Output: `app/build/outputs/apk/debug/`
 - **No automatic vehicle changes:** No commands are intentionally sent to car control modules by the discovery feature.
 - **Testing:** Validate on the actual head unit; an Android emulator cannot reproduce manufacturer MCU integrations.
 
-## 🤝 Credits & licensing / الحقوق
-
-ROUH Auto began from [OpenLauncher](https://github.com/vickoc911/openlauncher) and has since substantially diverged.
-
-**License:** Licensing and upstream provenance remain under review. Do not assume a license grant from this repository until the review is complete.
 
 ---
 
