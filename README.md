@@ -1,6 +1,6 @@
-# Car Launcher
+# ROUH Auto
 
-Car Launcher is a landscape-first Android home screen for aftermarket car head units. It is designed for Android 9 (API 28) and newer, with a large-touch-target Compose UI suitable for dashboard use.
+ROUH Auto is a landscape-first Android home screen for aftermarket car head units. It is designed for Android 9 (API 28) and newer, with a large-touch-target Compose UI suitable for dashboard use.
 
 ## Current features
 
@@ -34,7 +34,7 @@ The app is under active development. The standard public build does not include 
 
 ## Attribution
 
-Car Launcher started from [OpenLauncher](https://github.com/vickoc911/openlauncher) and has since substantially diverged.
+ROUH Auto started from [OpenLauncher](https://github.com/vickoc911/openlauncher) and has since substantially diverged.
 
 ## License
 
