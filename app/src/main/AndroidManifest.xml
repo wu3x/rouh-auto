@@ -28,11 +28,11 @@
     <application
         android:allowBackup="false"
         android:label="@string/app_name"
-        android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:icon="@drawable/rouh_auto_artwork"
+        android:roundIcon="@drawable/rouh_auto_artwork"
         android:supportsRtl="true"
         android:hardwareAccelerated="true"
-        android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
+        android:theme="@style/RouhAutoTheme">
 
         <activity
             android:name=".MainActivity"
