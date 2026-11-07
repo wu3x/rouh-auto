@@ -371,7 +371,7 @@ private fun SettingsList(
                 showChevron = true,
             )
             settingRow(
-                title = "Car Launcher",
+                title = "ROUH Auto",
                 subtitle = resources.getString(R.string.settings_diagnostics_version, diagnostics.appVersion),
             )
             settingRow(title = resources.getString(R.string.settings_diagnostics_android), subtitle = diagnostics.android)
@@ -552,7 +552,7 @@ data class DeviceDiagnostics(
     private val copyPermissionsLine: String = "Permissions: $permissions",
 ) {
     val copyText: String = listOf(
-        "Car Launcher $appVersion",
+        "ROUH Auto $appVersion",
         android,
         copyAbiLine,
         copyDisplayLine,
