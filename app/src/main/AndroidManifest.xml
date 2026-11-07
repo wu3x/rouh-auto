@@ -28,8 +28,8 @@
     <application
         android:allowBackup="false"
         android:label="@string/app_name"
-        android:icon="@drawable/rouh_auto_artwork"
-        android:roundIcon="@drawable/rouh_auto_artwork"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:hardwareAccelerated="true"
         android:theme="@style/RouhAutoTheme">
