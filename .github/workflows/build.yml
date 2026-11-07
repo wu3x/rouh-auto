@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build ROUH Auto APK
 
 on:
   push:
@@ -131,7 +131,7 @@ jobs:
         if: steps.prepare.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: car-launcher-next-debug-apk
+          name: rouh-auto-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 30
@@ -151,7 +151,7 @@ jobs:
           # Reuse one stable download URL. This is a debug APK, not a production release.
           if ! gh release view latest-test >/dev/null 2>&1; then
             gh release create latest-test \
-              --title "Car Launcher Next - Latest Test APK" \
+              --title "ROUH Auto - Latest Test APK" \
               --notes "Automatically built test APK from main. For emulator/head-unit testing only; not a signed production release." \
               --prerelease \
               --target "$GITHUB_SHA"
