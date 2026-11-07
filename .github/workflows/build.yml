@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: car-launcher-build-${{ github.ref }}
+  group: rouh-auto-build-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -146,6 +146,8 @@ jobs:
           apk="app/build/outputs/apk/debug/app-debug.apk"
           test -s "$apk"
           mkdir -p release-output
+          cp "$apk" release-output/rouh-auto-debug.apk
+          # Keep the former asset filename temporarily for existing download links.
           cp "$apk" release-output/car-launcher-next-debug.apk
 
           # Reuse one stable download URL. This is a debug APK, not a production release.
