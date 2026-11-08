@@ -45,10 +45,11 @@ fun MapDownloadDialog(onDismiss: () -> Unit) {
         "الطائف", "أبها وخميس مشيط", "جازان", "تبوك", "حائل",
         "بريدة", "نجران", "الباحة", "عرعر", "سكاكا"
     )
-    var selected by remember { mutableStateOf("جدة") }
+    var selected by remember { mutableStateOf("جازان") }
     var showAreas by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
     var downloadState by remember { mutableStateOf("لم يبدأ التنزيل") }
+    var downloading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
@@ -83,7 +84,21 @@ fun MapDownloadDialog(onDismiss: () -> Unit) {
                     }
                 }
                 Text(downloadState)
-                Text("يمكنك استيراد خريطة جازان MBTiles من ملفات الجهاز. تعمل دون شبكة إذا كانت منطقتك داخل الخريطة.")
+                Text("خريطة جازان تعمل دون إنترنت بعد تنزيلها مرة واحدة.")
+                if (selected == "جازان") {
+                    Button(enabled = !downloading, onClick = {
+                        downloading = true
+                        downloadState = "جارٍ الاتصال بخادم الخرائط..."
+                        scope.launch {
+                            try {
+                                downloadState = JazanMapDownloader.download(context) { downloadState = it }
+                            } catch (e: Exception) {
+                                downloadState = "فشل التنزيل: " + (e.message ?: "خطأ غير معروف")
+                            } finally { downloading = false }
+                        }
+                    }) { Text(if (downloading) "جارٍ تنزيل جازان..." else "تنزيل خريطة جازان") }
+                }
+                Text("أو استيراد ملف محفوظ مسبقًا:")
                 Button(onClick = { picker.launch(arrayOf("*/*")) }) { Text("استيراد ملف MBTiles لجازان") }
                 if (OfflineMbtiles.installed(context)) Text("✓ خريطة جازان مثبتة")
                 Text("تنزيل بقية المدن يتطلب نشر حزمها أولًا.")
