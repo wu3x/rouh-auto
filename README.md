@@ -6,7 +6,16 @@
 
 Android launcher for aftermarket head units.
 
-[**Download APK**](https://github.com/wu3x/rouh-auto/releases/download/latest-signed/rouh-auto-release.apk) · [**Builds**](https://github.com/wu3x/rouh-auto/actions/workflows/build.yml) · [**Releases**](https://github.com/wu3x/rouh-auto/releases)
+[![Android](https://img.shields.io/badge/Android-9%2B-3DDC84?logo=android&logoColor=white)](https://developer.android.com/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-Compose-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![UI](https://img.shields.io/badge/UI-Arabic%20%2F%20RTL-1787D4)](#features)
+[![Build](https://github.com/wu3x/rouh-auto/actions/workflows/build.yml/badge.svg)](https://github.com/wu3x/rouh-auto/actions/workflows/build.yml)
+[![Status](https://img.shields.io/badge/Status-Active%20development-F5A623)](#compatibility)
+[![Instagram](https://img.shields.io/badge/Instagram-%40wu3x-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/wu3x/)
+
+<a href="https://github.com/wu3x/rouh-auto/releases/download/latest-signed/rouh-auto-release.apk"><img alt="Download latest signed ROUH Auto APK" src="https://img.shields.io/badge/⬇_DOWNLOAD-ROUH_AUTO_APK-238636?style=for-the-badge&logo=android&logoColor=white" /></a>
+
+[**حالة البناء**](https://github.com/wu3x/rouh-auto/actions/workflows/build.yml) · [**الملفات**](app/src/main/java/org/wpfy/carlauncher)
 
 <img src="ROUH_Auto_Preview.gif" width="760" alt="ROUH Auto interface preview" />
 
