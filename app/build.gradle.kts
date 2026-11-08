@@ -10,7 +10,7 @@ android {
     }
 
     defaultConfig {
-        applicationId  = "org.wpfy.carlauncher"
+        applicationId  = "com.rouh.auto"
         minSdk         = 28
         targetSdk      = 36
         versionCode    = 10
