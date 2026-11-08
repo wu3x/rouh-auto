@@ -54,7 +54,11 @@ fun MapDownloadDialog(onDismiss: () -> Unit) {
         if (uri != null) {
             downloadState = "جارٍ استيراد الخريطة..."
             scope.launch {
-                downloadState = try { OfflineMbtiles.install(context, uri) }
+                downloadState = try {
+                    val message = OfflineMbtiles.install(context, uri)
+                    MapZoomState.setZoom(14f)
+                    message
+                }
                     catch (e: Exception) { "فشل الاستيراد: " + (e.message ?: "خطأ غير معروف") }
             }
         }
