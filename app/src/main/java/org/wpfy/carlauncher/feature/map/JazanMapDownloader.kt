@@ -66,7 +66,7 @@ internal object JazanMapDownloader {
                                 count += n
                                 require(count <= MAX_BYTES) { "الملف كبير جدًا" }
                                 output.write(buffer, 0, n)
-                                digest.update(buffer)
+                                digest.update(buffer, 0, n)
                                 if (length > 0 && count % (1024 * 1024) < n) {
                                     withContext(Dispatchers.Main) {
                                         progress("تنزيل جازان: " + count * 100 / length + "%")
