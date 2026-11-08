@@ -152,3 +152,25 @@ jobs:
               --target "$GITHUB_SHA"
           fi
           gh release upload latest-test release-output/rouh-auto-debug.apk release-output/car-launcher-next-debug.apk --clobber
+
+      - name: Publish signed APK for direct download
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="app/build/outputs/apk/release/app-release.apk"
+          test -s "$apk"
+          mkdir -p release-output
+          cp "$apk" release-output/rouh-auto-release.apk
+
+          # Keep the signed build separate from the legacy debug prerelease.
+          if ! gh release view latest-signed >/dev/null 2>&1; then
+            gh release create latest-signed \
+              --title "ROUH Auto - Latest Signed APK" \
+              --notes "Automatically built and verified release APK signed with the private ROUH Auto release key. The stable asset URL always points to the newest successful build." \
+              --prerelease \
+              --target "$GITHUB_SHA"
+          fi
+          gh release upload latest-signed release-output/rouh-auto-release.apk --clobber
