@@ -18,11 +18,33 @@ android {
         versionName    = "1.2"
     }
 
+    // Release signing is enabled only when CI provides all required secrets.
+    val releaseKeystore = System.getenv("ROUH_KEYSTORE_PATH")
+    val releasePassword = System.getenv("ROUH_KEYSTORE_PASSWORD")
+    val releaseAlias = System.getenv("ROUH_KEY_ALIAS")
+    val hasReleaseSigning = !releaseKeystore.isNullOrBlank() &&
+        !releasePassword.isNullOrBlank() && !releaseAlias.isNullOrBlank()
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("rouhRelease") {
+                storeFile = file(releaseKeystore!!)
+                storePassword = releasePassword
+                keyAlias = releaseAlias
+                keyPassword = releasePassword
+                storeType = "PKCS12"
+            }
+        }
+    }
+
     buildTypes {
         debug {
             // Default signing config for normal device testing (restores app visibility)
         }
         release {
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("rouhRelease")
+            }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
