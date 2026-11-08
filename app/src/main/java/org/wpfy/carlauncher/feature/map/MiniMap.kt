@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.gestures.detectTransformGestures
 import android.os.SystemClock
+import android.content.Context
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -132,7 +133,17 @@ fun MiniMap(
     } else {
         sample?.let { GeoPoint(latitude = it.latitude, longitude = it.longitude) }
     }
-    var selectedMode by remember { mutableStateOf<MapDisplayMode?>(null) }
+    // A pinned choice survives launcher restarts and is never overridden by auto-detection.
+    val modePreferences = remember(context) {
+        context.applicationContext.getSharedPreferences("rouh_map_mode", Context.MODE_PRIVATE)
+    }
+    var selectedMode by remember {
+        mutableStateOf(
+            modePreferences.getString("pinned_mode", null)
+                ?.let { saved -> MapDisplayMode.entries.firstOrNull { it.name == saved } }
+        )
+    }
+    var pendingMode by remember { mutableStateOf<MapDisplayMode?>(null) }
     var waitedForTiles by remember { mutableStateOf(false) }
     LaunchedEffect(sample != null) {
         waitedForTiles = false
@@ -372,34 +383,62 @@ fun MiniMap(
                 ),
         )
 
-        Row(
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(7.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(5.dp),
         ) {
-            MapDisplayMode.entries.forEach { mode ->
-                val active = displayMode == mode
+            // Show confirmation only after a deliberate tap, never automatically.
+            pendingMode?.let { pending ->
                 Surface(
-                    modifier = Modifier.size(if (active) 25.dp else 21.dp)
-                        .clickable { selectedMode = mode },
-                    shape = CircleShape,
-                    color = if (active) Color(0xFF3989F7) else Color(0xC9232B36),
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp, if (active) Color.White.copy(alpha = 0.7f)
-                        else Color.White.copy(alpha = 0.2f),
-                    ),
+                    onClick = {
+                        selectedMode = pending
+                        modePreferences.edit().putString("pinned_mode", pending.name).apply()
+                        pendingMode = null
+                    },
+                    color = Color(0xEE25364A),
+                    shape = CarShapes.extraSmall,
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = when (mode) {
-                                MapDisplayMode.Gps -> "G"
-                                MapDisplayMode.Online -> "N"
-                                MapDisplayMode.Decorative -> "D"
-                            },
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                        )
+                    Text(
+                        text = "تثبيت",
+                        modifier = Modifier.padding(horizontal = 13.dp, vertical = 5.dp),
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                MapDisplayMode.entries.forEach { mode ->
+                    val active = displayMode == mode
+                    val pinned = selectedMode == mode
+                    Surface(
+                        modifier = Modifier.size(if (active || pinned) 25.dp else 21.dp)
+                            .clickable { pendingMode = if (pendingMode == mode) null else mode },
+                        shape = CircleShape,
+                        color = if (pinned) Color(0xFF3989F7)
+                            else if (active) Color(0xBB3989F7) else Color(0xC9232B36),
+                        border = androidx.compose.foundation.BorderStroke(
+                            if (pinned) 2.dp else 1.dp,
+                            if (pinned) Color.White
+                            else Color.White.copy(alpha = if (active) 0.7f else 0.2f),
+                        ),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = when (mode) {
+                                    MapDisplayMode.Gps -> "G"
+                                    MapDisplayMode.Online -> "N"
+                                    MapDisplayMode.Decorative -> "D"
+                                },
+                                color = Color.White,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
                     }
                 }
             }
