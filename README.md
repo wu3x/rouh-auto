@@ -26,6 +26,16 @@
 
 </div>
 
+<div align="center">
+
+### 🎬 ROUH Auto — العرض الترويجي | Official Preview
+
+[![شاهد العرض الترويجي لـ ROUH Auto](5914CB83-92AF-4E02-968C-9AAF7449CA41.jpeg)](https://github.com/wu3x/rouh-auto/blob/main/ROUH_Auto_Promo_Ready.mp4)
+
+[**▶️ مشاهدة الفيديو الدعائي | Watch the cinematic preview**](https://github.com/wu3x/rouh-auto/blob/main/ROUH_Auto_Promo_Ready.mp4)
+
+</div>
+
 ---
 
 ## ✨ About / عن التطبيق
@@ -47,18 +57,6 @@ ROUH Auto is a native Android home-screen replacement built with **Kotlin + Jetp
 | 🗺️ **خريطة مصغّرة** | عرض موقع وخريطة داخل الواجهة؛ يتطلب توفر GPS واتصال مناسب |
 | 🔔 **الإشعارات** | عرض إشعارات التطبيقات بعد منح صلاحية الوصول |
 | ⚙️ **التخصيص** | إعدادات المظهر والواجهة والتحية وأسلوب الاستخدام |
-
-### 🎨 Interface / الواجهة
-
-التطبيق يستخدم تصميمًا داكنًا بلمسات لونية، وعناصر لمس كبيرة، ودعمًا للغة العربية واتجاه RTL.
-
-**Actual screenshots / صور حقيقية من التطبيق**
-
-> 📸 **قريبًا:** ستُضاف لقطات فعلية من شاشة السيارة أو المحاكي بعد اعتمادها. لم نضع صورًا تخيلية على أنها لقطات من التطبيق.
-
-| Home / الرئيسية | System test / اختبار النظام | Settings / الإعدادات |
-| :---: | :---: | :---: |
-| لقطة فعلية قريبًا | لقطة فعلية قريبًا | لقطة فعلية قريبًا |
 
 ## 📲 Installation / التثبيت
 
@@ -99,9 +97,7 @@ Output: `app/build/outputs/apk/debug/`
 
 ## 🧭 Project status / حالة المشروع
 
-- **In development:** UI, media integration, system utilities, and vehicle discovery are evolving.
-- **Hardware-dependent:** Car data discovery is read-only and does **not** guarantee access to BCM, CANBUS, door status, or fault codes.
-- **No automatic vehicle changes:** No commands are intentionally sent to car control modules by the discovery feature.
+- **In development:** UI, media integration, and launcher customization are evolving.
 - **Testing:** Validate on the actual head unit; an Android emulator cannot reproduce manufacturer MCU integrations.
 
 
