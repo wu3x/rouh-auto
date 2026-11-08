@@ -273,6 +273,7 @@ fun MiniMap(
                                 dstOffset = IntOffset(left.roundToInt(), top.roundToInt()),
                                 dstSize = tileSize,
                                 colorFilter = when {
+                                    MapTileStore.isOfflineCached(zoom, tx.mod(tilesPerSide), ty) -> null
                                     tileSource.needsDarkFilter -> DarkTileFilter
                                     MapStyle.GradeMapTilerTiles -> GradeTileFilter
                                     else -> null
