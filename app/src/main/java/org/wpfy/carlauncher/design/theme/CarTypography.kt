@@ -4,17 +4,10 @@ import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.Font
-import org.wpfy.carlauncher.R
 import androidx.compose.ui.unit.sp
 
-val ThmanyahFontFamily = FontFamily(
-    Font(R.font.thmanyah_light, FontWeight.Light),
-    Font(R.font.thmanyah_regular, FontWeight.Normal),
-    Font(R.font.thmanyah_medium, FontWeight.Medium),
-    Font(R.font.thmanyah_bold, FontWeight.Bold),
-    Font(R.font.thmanyah_black, FontWeight.Black),
-)
+/** Android system sans-serif: platform-provided, Arabic-capable, no bundled proprietary fonts. */
+val ThmanyahFontFamily = FontFamily.SansSerif
 
 val CarTypography = Typography(
     displayLarge = TextStyle(
