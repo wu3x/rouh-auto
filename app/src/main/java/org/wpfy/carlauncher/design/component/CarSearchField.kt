@@ -1,6 +1,7 @@
 package org.wpfy.carlauncher.design.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
@@ -44,15 +46,17 @@ fun CarSearchField(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .height(60.dp)
+            .clip(pillShape)
             .background(CarColors.SurfaceElevated, pillShape)
+            .border(1.dp, CarColors.Outline, pillShape)
             .padding(start = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = Icons.Rounded.Search,
             contentDescription = null,
-            modifier = Modifier.size(36.dp),
+            modifier = Modifier.size(26.dp),
             tint = CarColors.TextSecondary,
         )
 
@@ -68,7 +72,7 @@ fun CarSearchField(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyLarge.merge(
-                    TextStyle(color = CarColors.TextSecondary),
+                    TextStyle(color = CarColors.TextPrimary),
                 ),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(
@@ -102,7 +106,7 @@ fun CarSearchField(
                 )
             }
         } else {
-            Box(modifier = Modifier.size(16.dp))
+            Box(modifier = Modifier.size(56.dp))
         }
     }
 }
