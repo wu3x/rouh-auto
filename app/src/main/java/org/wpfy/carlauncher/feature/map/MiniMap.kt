@@ -254,7 +254,7 @@ fun MiniMap(
 
             val tileVersion = MapTileStore.version.collectAsState()
             val metersPerPx = metersPerTilePixel(mapCenter.latitude, zoom) / (tilePx / MapStyle.TileSizePx)
-            val accuracyRadiusPx = ((sample.accuracyMeters ?: 0f) / metersPerPx)
+            val accuracyRadiusPx = ((sample?.accuracyMeters ?: 0f) / metersPerPx)
                 .toFloat()
                 .coerceIn(36f * density, 120f * density)
 
@@ -327,8 +327,8 @@ fun MiniMap(
                     }
                 }
 
-                // Soft position halo under the host card's puck (accuracy-sized, unrotated).
-                drawCircle(
+                // Only show live-location accuracy while following the device.
+                if (!browseJazan && sample != null) drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
                             CarColors.AccentStrong.copy(alpha = 0.32f),
