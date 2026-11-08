@@ -30,7 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import org.wpfy.carlauncher.data.settings.StartupScreen
 import org.wpfy.carlauncher.design.theme.CarColors
 import org.wpfy.carlauncher.design.theme.CarTheme
-import org.wpfy.carlauncher.design.theme.ThmanyahFontFamily
+import org.wpfy.carlauncher.design.theme.RouhSystemFontFamily
 import org.wpfy.carlauncher.feature.home.HomeRoute
 import org.wpfy.carlauncher.feature.media.AndroidMediaRepository
 import org.wpfy.carlauncher.feature.media.MediaRoute
@@ -141,14 +141,14 @@ fun CarLauncherApp() {
                         text = welcomeText.take(welcomeLetters),
                         color = Color(0xFFF4F4F4),
                         fontSize = 42.sp,
-                        fontFamily = ThmanyahFontFamily,
+                        fontFamily = RouhSystemFontFamily,
                         fontWeight = FontWeight.Medium,
                     )
                     Text(
                         text = "CAR LAUNCHER",
                         color = Color(0xFF777F8C),
                         fontSize = 12.sp,
-                        fontFamily = ThmanyahFontFamily,
+                        fontFamily = RouhSystemFontFamily,
                         modifier = Modifier.padding(top = 18.dp),
                     )
                 }
