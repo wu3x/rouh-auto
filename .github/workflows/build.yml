@@ -34,33 +34,6 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
-      - name: Install private Thmanyah fonts for APK build
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p app/src/main/res/font
-          # Private release assets are fetched with the repository's GitHub token.
-          # Do not commit font files to source control.
-          if gh release download font-assets --pattern 'Thmanyah-Font-Family.zip' --dir /tmp --clobber; then
-            python3 - <<'PY'
-          import zipfile, pathlib
-          archive = zipfile.ZipFile('/tmp/Thmanyah-Font-Family.zip')
-          out = pathlib.Path('app/src/main/res/font')
-          for weight in ('Light', 'Regular', 'Medium', 'Bold', 'Black'):
-              suffix = f'thmanyahsans-{weight}.otf'
-              matches = [p for p in archive.namelist() if p.lower().endswith('/otf/' + suffix.lower()) and not p.startswith('__MACOSX/')]
-              if len(matches) != 1:
-                  raise SystemExit(f'Missing unique font file: {suffix}')
-              (out / f'thmanyah_{weight.lower()}.otf').write_bytes(archive.read(matches[0]))
-          print('Installed private Thmanyah Sans weights into APK resources.')
-          PY
-          else
-            echo "::error::Required private Thmanyah font release is unavailable; refusing to publish an incorrectly branded APK."
-            exit 1
-          fi
-
       - name: Assemble debug APK
         env:
           ROUH_BUILD_NUMBER: ${{ github.run_number }}
