@@ -202,6 +202,12 @@ private fun SettingsList(
     var greetingName by remember { mutableStateOf(WelcomePreferences.name(context)) }
     var editGreeting by remember { mutableStateOf(false) }
     var nameDraft by remember { mutableStateOf(greetingName) }
+    var mapDialogOpen by remember { mutableStateOf(false) }
+    var promptRevision by remember { mutableStateOf(0) }
+    promptRevision // trigger refresh after changing preference
+    if (mapDialogOpen) {
+        org.wpfy.carlauncher.feature.map.MapDownloadDialog(onDismiss = { mapDialogOpen = false })
+    }
     if (editGreeting) {
         AlertDialog(
             onDismissRequest = { editGreeting = false },
@@ -243,6 +249,24 @@ private fun SettingsList(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = CarSpacing.Xl),
         ) {
+            section("الخرائط")
+            settingRow(
+                title = "خرائط السعودية دون اتصال",
+                subtitle = "اختيار المدينة أو المنطقة وإدارة التنزيلات",
+                onClick = { mapDialogOpen = true },
+                showChevron = true,
+            )
+            settingRow(
+                title = "اقتراح تحميل الخرائط",
+                subtitle = if (org.wpfy.carlauncher.feature.map.MapDownloadPreferences.isPromptHidden(context))
+                    "مخفي — اضغط لإعادة تفعيله" else "مفعّل — اضغط لإخفائه",
+                onClick = {
+                    org.wpfy.carlauncher.feature.map.MapDownloadPreferences.setPromptHidden(
+                        context, !org.wpfy.carlauncher.feature.map.MapDownloadPreferences.isPromptHidden(context)
+                    )
+                    promptRevision++
+                },
+            )
             section(resources.getString(R.string.settings_section_launcher))
             settingRow(
                 title = resources.getString(R.string.settings_home_app),
