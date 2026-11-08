@@ -1,7 +1,6 @@
 <div align="center">
 
-<!-- Replace this temporary image with the new horizontal ROUH Auto banner once uploaded to the repository. -->
-<img src="app/src/main/res/drawable-nodpi/rouh_auto_512.png" width="320" alt="ROUH Auto" />
+<img src="5914CB83-92AF-4E02-968C-9AAF7449CA41.jpeg" width="760" alt="ROUH AUTO — banner" />
 
 ### مشغل لانشر لشاشات السيارات بنظام أندرويد البديلة
 
