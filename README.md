@@ -28,11 +28,7 @@
 
 <div align="center">
 
-### 🎬 ROUH Auto — العرض الترويجي | Official Preview
-
-[![شاهد العرض الترويجي لـ ROUH Auto](5914CB83-92AF-4E02-968C-9AAF7449CA41.jpeg)](https://github.com/wu3x/rouh-auto/blob/main/ROUH_Auto_Promo_Ready.mp4)
-
-[**▶️ مشاهدة الفيديو الدعائي | Watch the cinematic preview**](https://github.com/wu3x/rouh-auto/blob/main/ROUH_Auto_Promo_Ready.mp4)
+<img src="ROUH_Auto_Preview.gif" width="760" alt="ROUH Auto — animated launcher preview" />
 
 </div>
 
