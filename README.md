@@ -15,10 +15,12 @@
 [![UI](https://img.shields.io/badge/UI-Arabic%20%2F%20RTL-1787D4)](#-features--المميزات)
 [![Build](https://github.com/wu3x/rouh-auto/actions/workflows/build.yml/badge.svg)](https://github.com/wu3x/rouh-auto/actions/workflows/build.yml)
 [![Status](https://img.shields.io/badge/Status-Active%20development-F5A623)](#-project-status--حالة-المشروع)
-[![Download](https://img.shields.io/badge/Download-APK-228B22?logo=android&logoColor=white)](https://github.com/wu3x/rouh-auto/releases/download/latest-signed/rouh-auto-release.apk)
 [![Instagram](https://img.shields.io/badge/Instagram-%40wu3x-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/wu3x/)
 
-[**⬇️ تحميل التطبيق APK**](https://github.com/wu3x/rouh-auto/releases/download/latest-signed/rouh-auto-release.apk) ·
+<p align="center">
+  <a href="https://github.com/wu3x/rouh-auto/releases/download/latest-signed/rouh-auto-release.apk"><img alt="Download ROUH Auto APK" src="https://img.shields.io/badge/⬇_DOWNLOAD-ROUH_AUTO_APK-238636?style=for-the-badge&logo=android&logoColor=white" /></a>
+</p>
+
 [**🛠️ حالة البناء**](https://github.com/wu3x/rouh-auto/actions/workflows/build.yml) ·
 [**📂 الملفات**](app/src/main/java/org/wpfy/carlauncher)
 
