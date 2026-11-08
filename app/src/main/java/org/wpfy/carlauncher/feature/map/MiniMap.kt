@@ -133,7 +133,12 @@ fun MiniMap(
         gpsFix -> MapDisplayMode.Gps
         else -> MapDisplayMode.Online
     }
-    val displayMode = selectedMode ?: automaticMode
+    val displayMode = when (selectedMode) {
+        MapDisplayMode.Gps -> if (sample != null && gpsFix) MapDisplayMode.Gps else MapDisplayMode.Decorative
+        MapDisplayMode.Online -> if (sample != null) MapDisplayMode.Online else MapDisplayMode.Decorative
+        MapDisplayMode.Decorative -> MapDisplayMode.Decorative
+        null -> automaticMode
+    }
     val decorativeIdle = displayMode == MapDisplayMode.Decorative
     // Continue probing map tiles even after decorative fallback; switch back when they arrive.
     LaunchedEffect(sample?.latitude, sample?.longitude, tileZoom, decorativeIdle) {
