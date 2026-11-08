@@ -9,7 +9,7 @@ internal object MapZoomState {
     var zoom by mutableFloatStateOf(MapStyle.DefaultZoom)
         private set
 
-    fun setZoom(level: Float) {
+    fun updateZoomLevel(level: Float) {
         zoom = level.coerceIn(MapStyle.MinZoom, MapStyle.MaxZoom)
     }
 
