@@ -103,7 +103,7 @@ fun MiniMap(
     val sample = location.sample?.takeUnless { location.isStale }
     var selectedMode by remember { mutableStateOf<MapDisplayMode?>(null) }
     var waitedForTiles by remember { mutableStateOf(false) }
-    LaunchedEffect(sample?.latitude, sample?.longitude) {
+    LaunchedEffect(sample != null) {
         waitedForTiles = false
         if (sample != null) {
             delay(6_000L)
@@ -135,6 +135,14 @@ fun MiniMap(
     }
     val displayMode = selectedMode ?: automaticMode
     val decorativeIdle = displayMode == MapDisplayMode.Decorative
+    // Continue probing map tiles even after decorative fallback; switch back when they arrive.
+    LaunchedEffect(sample?.latitude, sample?.longitude, tileZoom, decorativeIdle) {
+        if (sample != null && decorativeIdle && selectedMode == null) {
+            val cx = (lonToWorldX(sample.longitude) * (1 shl tileZoom)).toInt()
+            val cy = (latToWorldY(sample.latitude) * (1 shl tileZoom)).toInt()
+            MapTileStore.request(this, tileZoom, cx, cy)
+        }
+    }
 
     // Heading: only follow GPS bearing while actually moving, and always rotate the short way.
     var unwrappedBearing by remember { mutableFloatStateOf(0f) }
