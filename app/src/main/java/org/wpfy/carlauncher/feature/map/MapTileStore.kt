@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.SystemClock
-import android.util.Log
 import android.util.LruCache
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -58,7 +57,7 @@ internal object MapTileStore {
     private val _version = MutableStateFlow(0)
     private val _source = MutableStateFlow(MapStyle.initialSource())
 
-    /** Active tile source; flips to OpenStreetMap if MapTiler rejects the key or quota. */
+    /** Online tile source used when no offline tile is available. */
     val source: StateFlow<MapStyle.Source> = _source.asStateFlow()
 
     /** Increments whenever a new tile becomes available so the map can redraw. */
@@ -161,14 +160,7 @@ internal object MapTileStore {
                 setRequestProperty("User-Agent", MapStyle.UserAgent)
             }
             val code = connection.responseCode
-            if (code != HttpURLConnection.HTTP_OK) {
-                val keyProblem = code == 401 || code == 403 || code == 429
-                if (source == MapStyle.Source.MapTiler && keyProblem) {
-                    Log.w("MapTileStore", "MapTiler refused tiles (HTTP $code); using OpenStreetMap")
-                    _source.value = MapStyle.Source.OpenStreetMap
-                }
-                return null
-            }
+            if (code != HttpURLConnection.HTTP_OK) return null
 
             // Bound the download while reading; readBytes() could allocate unbounded memory.
             if (connection.contentLengthLong > MaxTileFileBytes) return null
