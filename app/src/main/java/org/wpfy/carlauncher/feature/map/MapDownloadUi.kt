@@ -1,6 +1,10 @@
 package org.wpfy.carlauncher.feature.map
 
 import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,6 +49,16 @@ fun MapDownloadDialog(onDismiss: () -> Unit) {
     var showAreas by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
     var downloadState by remember { mutableStateOf("لم يبدأ التنزيل") }
+    val scope = rememberCoroutineScope()
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            downloadState = "جارٍ استيراد الخريطة..."
+            scope.launch {
+                downloadState = try { OfflineMbtiles.install(context, uri) }
+                    catch (e: Exception) { "فشل الاستيراد: " + (e.message ?: "خطأ غير معروف") }
+            }
+        }
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("خرائط السعودية دون اتصال") },
@@ -65,7 +79,10 @@ fun MapDownloadDialog(onDismiss: () -> Unit) {
                     }
                 }
                 Text(downloadState)
-                Text("يلزم نشر ملف جدة في GitHub Releases أولًا.")
+                Text("يمكنك استيراد خريطة جازان MBTiles من ملفات الجهاز. تعمل دون شبكة إذا كانت منطقتك داخل الخريطة.")
+                Button(onClick = { picker.launch(arrayOf("*/*")) }) { Text("استيراد ملف MBTiles لجازان") }
+                if (OfflineMbtiles.installed(context)) Text("✓ خريطة جازان مثبتة")
+                Text("تنزيل بقية المدن يتطلب نشر حزمها أولًا.")
                 if (selected == "جدة") {
                     Button(onClick = {
                         downloadState = "جارٍ فحص توفر خريطة جدة..."
