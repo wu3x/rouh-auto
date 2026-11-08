@@ -124,6 +124,9 @@ jobs:
           fi
           gh release upload latest-test release-output/rouh-auto-debug.apk --clobber
 
+          # Remove the obsolete asset retained by earlier builds.
+          gh release delete-asset latest-test car-launcher-next-debug.apk --yes 2>/dev/null || true
+
       - name: Publish signed APK for direct download
         if: github.ref == 'refs/heads/main'
         env:
