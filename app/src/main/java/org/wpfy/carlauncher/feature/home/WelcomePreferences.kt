@@ -12,7 +12,7 @@ object WelcomePreferences {
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getBoolean(ENABLED, true)
 
     fun name(context: Context): String =
-        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getString(NAME, "أحمد").orEmpty()
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getString(NAME, "").orEmpty()
 
     fun setEnabled(context: Context, value: Boolean) {
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit().putBoolean(ENABLED, value).apply()
