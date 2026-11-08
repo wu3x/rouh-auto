@@ -48,46 +48,12 @@ internal fun httpPostJson(url: String, body: String, timeoutMillis: Int = 20_000
     }
 }
 
-/**
- * Destination search: MapTiler geocoding first (when a key is configured), then the public
- * OpenStreetMap Nominatim service as a fallback. Blocking; call from a background dispatcher.
- */
+/** Destination search using OpenStreetMap Nominatim. Call from a background dispatcher. */
 internal object DestinationSearch {
     fun search(query: String, near: LocationSample?): List<NavigationDestination> {
         val text = query.trim()
         if (text.length < 2) return emptyList()
-
-        if (MapStyle.MapTilerKey.isNotBlank()) {
-            val results = runCatching { searchMapTiler(text, near) }.getOrNull()
-            if (!results.isNullOrEmpty()) return results
-        }
         return searchNominatim(text, near)
-    }
-
-    private fun searchMapTiler(query: String, near: LocationSample?): List<NavigationDestination> {
-        val proximity = near?.let { "&proximity=${it.longitude},${it.latitude}" }.orEmpty()
-        val url = "https://api.maptiler.com/geocoding/${Uri.encode(query)}.json" +
-            "?key=${MapStyle.MapTilerKey}&limit=8&language=ar,en$proximity"
-        val features = JSONObject(httpGetText(url)).optJSONArray("features") ?: return emptyList()
-
-        val results = ArrayList<NavigationDestination>()
-        for (index in 0 until features.length()) {
-            val feature = features.optJSONObject(index) ?: continue
-            val center = feature.optJSONArray("center")
-                ?: feature.optJSONObject("geometry")?.optJSONArray("coordinates")
-                ?: continue
-            if (center.length() < 2) continue
-            val label = feature.optString("text").ifBlank { feature.optString("place_name") }
-            if (label.isBlank()) continue
-            val fullName = feature.optString("place_name").takeIf { it.isNotBlank() && it != label }
-            results += NavigationDestination(
-                label = label,
-                address = fullName,
-                latitude = center.getDouble(1),
-                longitude = center.getDouble(0),
-            )
-        }
-        return results
     }
 
     private fun searchNominatim(query: String, near: LocationSample?): List<NavigationDestination> {
