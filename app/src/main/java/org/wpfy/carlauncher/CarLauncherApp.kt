@@ -48,9 +48,9 @@ import org.wpfy.carlauncher.shell.rememberShellState
 @Composable
 fun CarLauncherApp() {
     val context = LocalContext.current
-    var welcomeVisible by remember { mutableStateOf(WelcomePreferences.enabled(context)) }
+    var welcomeVisible by remember { mutableStateOf(WelcomePreferences.enabled(context) && WelcomePreferences.name(context).isNotBlank()) }
     var welcomeLetters by remember { mutableStateOf(0) }
-    val welcomeText = remember(context) { "أهلاً "+WelcomePreferences.name(context) }
+    val welcomeText = remember(context) { "أهلاً " + WelcomePreferences.name(context) }
     LaunchedEffect(Unit) {
         if (welcomeVisible) {
             for (i in 1..welcomeText.length) {
