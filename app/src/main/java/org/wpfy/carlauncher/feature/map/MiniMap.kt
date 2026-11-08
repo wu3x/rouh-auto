@@ -126,6 +126,12 @@ fun MiniMap(
     val density = LocalDensity.current.density
     val location = rememberMiniMapLocation()
     val sample = location.sample?.takeUnless { location.isStale }
+    var browseJazan by remember { mutableStateOf(false) }
+    val mapCenter = if (browseJazan && OfflineMbtiles.installed(context)) {
+        GeoPoint(latitude = 16.8894, longitude = 42.5706)
+    } else {
+        sample?.let { GeoPoint(latitude = it.latitude, longitude = it.longitude) }
+    }
     var selectedMode by remember { mutableStateOf<MapDisplayMode?>(null) }
     var waitedForTiles by remember { mutableStateOf(false) }
     LaunchedEffect(sample != null) {
@@ -138,8 +144,8 @@ fun MiniMap(
 
     remember(context) { MapTileStore.init(context) }
     val tileSource by MapTileStore.source.collectAsState()
-    val offlineCoverage = sample != null && OfflineMbtiles.installed(context) &&
-        sample.longitude in 42.0757..43.4207 && sample.latitude in 16.4054..17.7435
+    val offlineCoverage = mapCenter != null && OfflineMbtiles.installed(context) &&
+        mapCenter.longitude in 42.0757..43.4207 && mapCenter.latitude in 16.4054..17.7435
     LaunchedEffect(offlineCoverage) {
         if (offlineCoverage && MapZoomState.zoom > 14.99f) MapZoomState.updateZoomLevel(14f)
     }
@@ -149,32 +155,32 @@ fun MiniMap(
     val routePath = remember(route, tileZoom) { buildRoutePath(route, tileZoom) }
     val gpsFix = sample?.provider.equals("gps", ignoreCase = true)
     val tileVersionForMode by MapTileStore.version.collectAsState()
-    val centerTileAvailable = if (sample != null) {
-        val cx = (lonToWorldX(sample.longitude) * (1 shl tileZoom)).toInt()
-        val cy = (latToWorldY(sample.latitude) * (1 shl tileZoom)).toInt()
+    val centerTileAvailable = if (mapCenter != null) {
+        val cx = (lonToWorldX(mapCenter.longitude) * (1 shl tileZoom)).toInt()
+        val cy = (latToWorldY(mapCenter.latitude) * (1 shl tileZoom)).toInt()
         tileVersionForMode // Observe tile arrival.
         MapTileStore.peek(tileZoom, cx, cy) != null
     } else false
     val automaticMode = when {
-        sample == null -> MapDisplayMode.Decorative
-        centerTileAvailable && gpsFix -> MapDisplayMode.Gps
+        mapCenter == null -> MapDisplayMode.Decorative
+        centerTileAvailable && gpsFix && !browseJazan -> MapDisplayMode.Gps
         centerTileAvailable -> MapDisplayMode.Online
         waitedForTiles -> MapDisplayMode.Decorative
-        gpsFix -> MapDisplayMode.Gps
+        gpsFix && !browseJazan -> MapDisplayMode.Gps
         else -> MapDisplayMode.Online
     }
     val displayMode = when (selectedMode) {
         MapDisplayMode.Gps -> if (sample != null && gpsFix) MapDisplayMode.Gps else MapDisplayMode.Decorative
-        MapDisplayMode.Online -> if (sample != null) MapDisplayMode.Online else MapDisplayMode.Decorative
+        MapDisplayMode.Online -> if (mapCenter != null) MapDisplayMode.Online else MapDisplayMode.Decorative
         MapDisplayMode.Decorative -> MapDisplayMode.Decorative
         null -> automaticMode
     }
     val decorativeIdle = displayMode == MapDisplayMode.Decorative
     // Continue probing map tiles even after decorative fallback; switch back when they arrive.
-    LaunchedEffect(sample?.latitude, sample?.longitude, tileZoom, decorativeIdle) {
-        if (sample != null && decorativeIdle && selectedMode == null) {
-            val cx = (lonToWorldX(sample.longitude) * (1 shl tileZoom)).toInt()
-            val cy = (latToWorldY(sample.latitude) * (1 shl tileZoom)).toInt()
+    LaunchedEffect(mapCenter?.latitude, mapCenter?.longitude, tileZoom, decorativeIdle) {
+        if (mapCenter != null && decorativeIdle && selectedMode == null) {
+            val cx = (lonToWorldX(mapCenter.longitude) * (1 shl tileZoom)).toInt()
+            val cy = (latToWorldY(mapCenter.latitude) * (1 shl tileZoom)).toInt()
             MapTileStore.request(this, tileZoom, cx, cy)
         }
     }
@@ -193,7 +199,7 @@ fun MiniMap(
         }
     }
     val animatedBearing by animateFloatAsState(
-        targetValue = unwrappedBearing,
+        targetValue = if (browseJazan) 0f else unwrappedBearing,
         animationSpec = tween(durationMillis = 900, easing = LinearOutSlowInEasing),
         label = "mini-map-heading",
     )
@@ -220,9 +226,9 @@ fun MiniMap(
         val tilesPerSide = 1 shl zoom
         val worldSize = MapStyle.TileSizePx.toDouble() * tilesPerSide
 
-        if (sample != null && !decorativeIdle) {
-            val centerX = lonToWorldX(sample.longitude) * worldSize
-            val centerY = latToWorldY(sample.latitude) * worldSize
+        if (mapCenter != null && !decorativeIdle) {
+            val centerX = lonToWorldX(mapCenter.longitude) * worldSize
+            val centerY = latToWorldY(mapCenter.latitude) * worldSize
             val centerTileX = floor(centerX / MapStyle.TileSizePx).toInt()
             val centerTileY = floor(centerY / MapStyle.TileSizePx).toInt()
 
@@ -247,7 +253,7 @@ fun MiniMap(
             }
 
             val tileVersion = MapTileStore.version.collectAsState()
-            val metersPerPx = metersPerTilePixel(sample.latitude, zoom) / (tilePx / MapStyle.TileSizePx)
+            val metersPerPx = metersPerTilePixel(mapCenter.latitude, zoom) / (tilePx / MapStyle.TileSizePx)
             val accuracyRadiusPx = ((sample.accuracyMeters ?: 0f) / metersPerPx)
                 .toFloat()
                 .coerceIn(36f * density, 120f * density)
@@ -407,7 +413,7 @@ fun MiniMap(
             )
         }
 
-        if (!mapPromptHidden && selectedMode == null) {
+        if (!mapPromptHidden && selectedMode == null && !OfflineMbtiles.installed(context)) {
             Row(
                 modifier = Modifier.align(Alignment.BottomStart).padding(start = 8.dp, bottom = 28.dp),
                 horizontalArrangement = Arrangement.spacedBy(3.dp),
@@ -446,6 +452,24 @@ fun MiniMap(
                 .padding(end = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
+            if (OfflineMbtiles.installed(context)) {
+                Surface(
+                    onClick = {
+                        browseJazan = !browseJazan
+                        selectedMode = null
+                        if (browseJazan) MapZoomState.updateZoomLevel(12f)
+                    },
+                    color = if (browseJazan) Color(0xFF3989F7) else Color(0xD9232B36),
+                    shape = CircleShape,
+                ) {
+                    Text(
+                        text = if (browseJazan) "↩" else "ج",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
+            }
             ZoomButton(icon = Icons.Rounded.Add, label = "+") { MapZoomState.zoomBy(1f) }
             ZoomButton(icon = Icons.Rounded.Remove, label = "-") { MapZoomState.zoomBy(-1f) }
         }
