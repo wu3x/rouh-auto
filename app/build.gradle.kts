@@ -13,7 +13,8 @@ android {
         applicationId  = "com.rouh.auto"
         minSdk         = 28
         targetSdk      = 36
-        versionCode    = 10
+        // CI run numbers increase on each build; local builds retain the development baseline.
+        versionCode    = (System.getenv("ROUH_BUILD_NUMBER")?.toIntOrNull() ?: 10)
         versionName    = "1.2"
     }
 
