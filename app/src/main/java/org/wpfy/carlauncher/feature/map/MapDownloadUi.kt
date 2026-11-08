@@ -41,8 +41,10 @@ fun MapDownloadDialog(onDismiss: () -> Unit) {
         "الطائف", "أبها وخميس مشيط", "جازان", "تبوك", "حائل",
         "بريدة", "نجران", "الباحة", "عرعر", "سكاكا"
     )
-    var selected by remember { mutableStateOf(areas.first()) }
+    var selected by remember { mutableStateOf("جدة") }
     var showAreas by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var downloadState by remember { mutableStateOf("لم يبدأ التنزيل") }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("خرائط السعودية دون اتصال") },
@@ -62,7 +64,16 @@ fun MapDownloadDialog(onDismiss: () -> Unit) {
                         }
                     }
                 }
-                Text("التنزيل غير متاح في هذه النسخة. نجهز ملفات خرائط مرخصة للسعودية قبل تفعيل التنزيل؛ لن يتم استهلاك بيانات أو تخزين ملفات وهمية.")
+                Text(downloadState)
+                Text("يلزم نشر ملف جدة في GitHub Releases أولًا.")
+                if (selected == "جدة") {
+                    Button(onClick = {
+                        downloadState = "جارٍ فحص توفر خريطة جدة..."
+                        SaudiMapPackageDownloader.downloadJeddah(context) { status ->
+                            downloadState = status
+                        }
+                    }) { Text("تنزيل خريطة جدة") }
+                }
             }
         },
         confirmButton = { Button(onClick = onDismiss) { Text("حسنًا") } },
