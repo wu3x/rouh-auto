@@ -113,8 +113,6 @@ jobs:
           test -s "$apk"
           mkdir -p release-output
           cp "$apk" release-output/rouh-auto-debug.apk
-          # Keep the former asset filename temporarily for existing download links.
-          cp "$apk" release-output/car-launcher-next-debug.apk
 
           # Reuse one stable download URL. This is a debug APK, not a production release.
           if ! gh release view latest-test >/dev/null 2>&1; then
@@ -124,7 +122,7 @@ jobs:
               --prerelease \
               --target "$GITHUB_SHA"
           fi
-          gh release upload latest-test release-output/rouh-auto-debug.apk release-output/car-launcher-next-debug.apk --clobber
+          gh release upload latest-test release-output/rouh-auto-debug.apk --clobber
 
       - name: Publish signed APK for direct download
         if: github.ref == 'refs/heads/main'
@@ -138,7 +136,7 @@ jobs:
           mkdir -p release-output
           cp "$apk" release-output/rouh-auto-release.apk
 
-          # Keep the signed build separate from the legacy debug prerelease.
+          # Keep the signed build separate from debug test builds.
           if ! gh release view latest-signed >/dev/null 2>&1; then
             gh release create latest-signed \
               --title "ROUH Auto - Latest Signed APK" \
