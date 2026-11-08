@@ -3,35 +3,31 @@ package org.wpfy.carlauncher.feature.map
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 
-/**
- * UI groundwork only. Do not pretend to download maps until a licensed, hosted Saudi
- * offline-map catalog and a verified reader have been integrated.
- */
 object MapDownloadPreferences {
     private const val PREFS = "rouh_map_download"
     private const val HIDE_PROMPT = "hide_prompt"
+
     fun isPromptHidden(context: Context): Boolean =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(HIDE_PROMPT, false)
+
     fun setPromptHidden(context: Context, hidden: Boolean) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
             .putBoolean(HIDE_PROMPT, hidden).apply()
@@ -40,79 +36,63 @@ object MapDownloadPreferences {
 
 @Composable
 fun MapDownloadDialog(onDismiss: () -> Unit) {
-    val areas = listOf(
-        "الرياض", "مكة المكرمة", "جدة", "المدينة المنورة", "الدمام والخبر",
-        "الطائف", "أبها وخميس مشيط", "جازان", "تبوك", "حائل",
-        "بريدة", "نجران", "الباحة", "عرعر", "سكاكا"
-    )
-    var selected by remember { mutableStateOf("جازان") }
-    var showAreas by remember { mutableStateOf(false) }
-    val context = androidx.compose.ui.platform.LocalContext.current
-    var downloadState by remember { mutableStateOf("لم يبدأ التنزيل") }
-    var downloading by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var status by remember { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) {
-            downloadState = "جارٍ استيراد الخريطة..."
+        if (uri != null && !busy) {
+            busy = true
+            status = "جارٍ استيراد الخريطة..."
             scope.launch {
-                downloadState = try {
-                    val message = OfflineMbtiles.install(context, uri)
+                try {
+                    status = OfflineMbtiles.install(context, uri)
                     MapZoomState.updateZoomLevel(14f)
-                    message
+                } catch (e: Exception) {
+                    status = "تعذر الاستيراد: ${e.message ?: "خطأ غير معروف"}"
+                } finally {
+                    busy = false
                 }
-                    catch (e: Exception) { "فشل الاستيراد: " + (e.message ?: "خطأ غير معروف") }
             }
         }
     }
+
     AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("خرائط السعودية دون اتصال") },
+        onDismissRequest = { if (!busy) onDismiss() },
+        title = { Text("خرائط دون اتصال") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("اختر المدينة التي ترغب في حفظ خريطتها:")
-                TextButton(onClick = { showAreas = !showAreas }) { Text("$selected ▾") }
-                if (showAreas) {
-                    androidx.compose.foundation.lazy.LazyColumn(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
-                    ) {
-                        items(areas.size) { index ->
-                            TextButton(onClick = {
-                                selected = areas[index]
-                                showAreas = false
-                            }) { Text(areas[index]) }
-                        }
-                    }
-                }
-                Text(downloadState)
-                Text("خريطة جازان تعمل دون إنترنت بعد تنزيلها مرة واحدة.")
-                if (selected == "جازان") {
-                    Button(enabled = !downloading, onClick = {
-                        downloading = true
-                        downloadState = "جارٍ الاتصال بخادم الخرائط..."
+                Text("جازان")
+                Text(if (OfflineMbtiles.installed(context)) "الخريطة مثبتة على الجهاز" else "خريطة جاهزة للتنزيل (20 MB تقريبًا)")
+                if (status.isNotEmpty()) Text(status)
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !busy,
+                    onClick = {
+                        busy = true
+                        status = "جارٍ الاتصال بالخادم..."
                         scope.launch {
                             try {
-                                downloadState = JazanMapDownloader.download(context) { downloadState = it }
+                                status = JazanMapDownloader.download(context) { status = it }
                             } catch (e: Exception) {
-                                downloadState = "فشل التنزيل: " + (e.message ?: "خطأ غير معروف")
-                            } finally { downloading = false }
+                                status = "تعذر التنزيل: ${e.message ?: "خطأ غير معروف"}"
+                            } finally {
+                                busy = false
+                            }
                         }
-                    }) { Text(if (downloading) "جارٍ تنزيل جازان..." else "تنزيل خريطة جازان") }
+                    },
+                ) {
+                    Text(if (busy) "جارٍ المعالجة..." else if (OfflineMbtiles.installed(context)) "إعادة تنزيل خريطة جازان" else "تنزيل خريطة جازان")
                 }
-                Text("أو استيراد ملف محفوظ مسبقًا:")
-                Button(onClick = { picker.launch(arrayOf("*/*")) }) { Text("استيراد ملف MBTiles لجازان") }
-                if (OfflineMbtiles.installed(context)) Text("✓ خريطة جازان مثبتة")
-                Text("تنزيل بقية المدن يتطلب نشر حزمها أولًا.")
-                if (selected == "جدة") {
-                    Button(onClick = {
-                        downloadState = "جارٍ فحص توفر خريطة جدة..."
-                        SaudiMapPackageDownloader.downloadJeddah(context) { status ->
-                            downloadState = status
-                        }
-                    }) { Text("تنزيل خريطة جدة") }
+                TextButton(enabled = !busy, onClick = { picker.launch(arrayOf("*/*")) }) {
+                    Text("استيراد ملف MBTiles من الجهاز")
                 }
+                Text("تعمل الخريطة دون إنترنت بعد تثبيتها. يلزم دعم GPS في الجهاز لتتبع الموقع.")
             }
         },
-        confirmButton = { Button(onClick = onDismiss) { Text("حسنًا") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("إغلاق") } },
+        confirmButton = {
+            TextButton(enabled = !busy, onClick = onDismiss) { Text("إغلاق") }
+        },
     )
 }
