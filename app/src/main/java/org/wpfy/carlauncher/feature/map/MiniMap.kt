@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Checkbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
@@ -98,6 +100,29 @@ fun MiniMap(
     if (LocalInspectionMode.current) return
 
     val context = LocalContext.current
+    var mapPromptHidden by remember { mutableStateOf(MapDownloadPreferences.isPromptHidden(context)) }
+    var showMapDownloadDialog by remember { mutableStateOf(false) }
+    var showHideConfirmation by remember { mutableStateOf(false) }
+    if (showMapDownloadDialog) {
+        MapDownloadDialog(onDismiss = { showMapDownloadDialog = false })
+    }
+    if (showHideConfirmation) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showHideConfirmation = false },
+            title = { Text("اقتراح تحميل الخرائط") },
+            text = { Text("إخفاء الاقتراح في المرات القادمة؟ تقدر ترجع له من الإعدادات في أي وقت.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    MapDownloadPreferences.setPromptHidden(context, true)
+                    mapPromptHidden = true
+                    showHideConfirmation = false
+                }) { Text("عدم الإظهار مرة أخرى") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showHideConfirmation = false }) { Text("إلغاء") }
+            },
+        )
+    }
     val density = LocalDensity.current.density
     val location = rememberMiniMapLocation()
     val sample = location.sample?.takeUnless { location.isStale }
@@ -375,6 +400,39 @@ fun MiniMap(
                 color = Color.White.copy(alpha = 0.55f),
                 style = MaterialTheme.typography.labelSmall,
             )
+        }
+
+        if (!mapPromptHidden && selectedMode == null) {
+            Row(
+                modifier = Modifier.align(Alignment.BottomStart).padding(start = 8.dp, bottom = 28.dp),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Surface(
+                    onClick = { showMapDownloadDialog = true },
+                    color = Color(0xE51B2B3E),
+                    shape = CarShapes.extraSmall,
+                ) {
+                    Text(
+                        text = "↓ تحميل خرائط السعودية",
+                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
+                Surface(
+                    onClick = { showHideConfirmation = true },
+                    color = Color(0xC91B2B3E),
+                    shape = CarShapes.extraSmall,
+                ) {
+                    Text(
+                        text = "×",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
+            }
         }
 
         Column(
