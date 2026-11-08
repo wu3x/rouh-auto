@@ -1,6 +1,7 @@
 package org.wpfy.carlauncher.design.component
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -8,7 +9,6 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import org.wpfy.carlauncher.design.theme.CarColors
@@ -28,16 +28,17 @@ fun CarIconButton(
         modifier = modifier
             .size(56.dp)
             .clip(CarShapes.extraLarge)
+            .background(if (outlined) CarColors.SurfaceContainer else CarColors.SurfaceElevated.copy(alpha = 0.45f))
             .then(
                 if (outlined) {
-                    Modifier.border(2.dp, CarColors.TextDisabled, CarShapes.extraLarge)
+                    Modifier.border(1.dp, CarColors.Outline, CarShapes.extraLarge)
                 } else {
                     Modifier
                 },
         ),
         enabled = enabled,
         colors = IconButtonDefaults.iconButtonColors(
-            containerColor = Color.Transparent,
+            containerColor = androidx.compose.ui.graphics.Color.Transparent,
             contentColor = CarColors.TextPrimary,
             disabledContentColor = CarColors.TextDisabled,
         ),
@@ -45,7 +46,7 @@ fun CarIconButton(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            modifier = Modifier.size(34.dp),
+            modifier = Modifier.size(28.dp),
         )
     }
 }
