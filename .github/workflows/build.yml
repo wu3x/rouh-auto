@@ -20,80 +20,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          persist-credentials: true
-
-      - name: Import source ZIP once (if present)
-        id: prepare
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ -f car-launcher-modified.zip && ! -f settings.gradle.kts ]]; then
-            echo "Inspecting ZIP contents..."
-            unzip -Z -1 car-launcher-modified.zip | head -30 || true
-            mkdir -p .import-src
-            unzip -q car-launcher-modified.zip -d .import-src
-
-            # Some GitHub source downloads wrap the actual Android ZIP.
-            # Expand nested ZIPs (bounded to three levels), then locate Gradle.
-            for depth in 1 2 3; do
-              project_settings="$(find .import-src -type f -name settings.gradle.kts -print -quit)"
-              if [[ -n "$project_settings" ]]; then break; fi
-              nested_zip="$(find .import-src -type f -iname '*.zip' -print -quit)"
-              if [[ -z "$nested_zip" ]]; then break; fi
-              echo "Expanding nested archive (level $depth): $nested_zip"
-              nested_dir=".import-src/nested-$depth"
-              mkdir -p "$nested_dir"
-              unzip -q "$nested_zip" -d "$nested_dir"
-              rm -f "$nested_zip"
-            done
-            project_settings="$(find .import-src -type f -name settings.gradle.kts -print -quit)"
-            if [[ -z "$project_settings" ]]; then
-              echo "::error::No Android Gradle project found after expanding nested ZIPs."
-              find .import-src -maxdepth 5 -type f | head -60 || true
-              exit 1
-            fi
-            project_dir="$(dirname "$project_settings")"
-            echo "Found Android project at: $project_dir"
-            test -f "$project_dir/gradlew" || { echo "::error::Missing gradlew"; exit 1; }
-            test -f "$project_dir/app/build.gradle.kts" || { echo "::error::Missing app/build.gradle.kts"; exit 1; }
-            # Never overwrite the CI workflow with the one inside the legacy project.
-            cp -a "$project_dir"/. ./
-            git restore --source=HEAD -- .github/workflows/build.yml
-            rm -rf .import-src
-            rm car-launcher-modified.zip
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A
-            if ! git diff --cached --quiet; then
-              git commit -m "chore: import launcher source as regular files"
-              git push
-            fi
-          fi
-          if [[ -f settings.gradle.kts && -f gradlew && -f app/build.gradle.kts ]]; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Project source is not uploaded yet."
-          fi
+          persist-credentials: false
 
       - name: Set up Java 17
-        if: steps.prepare.outputs.ready == 'true'
-        uses: actions/setup-java@v4
+                uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Set up Gradle
-        if: steps.prepare.outputs.ready == 'true'
-        uses: gradle/actions/setup-gradle@v4
+                uses: gradle/actions/setup-gradle@v4
 
       - name: Accept Android SDK licenses
-        if: steps.prepare.outputs.ready == 'true'
-        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+                run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
       - name: Install private Thmanyah fonts for APK build
-        if: steps.prepare.outputs.ready == 'true'
-        env:
+                env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
@@ -115,21 +57,26 @@ jobs:
           print('Installed private Thmanyah Sans weights into APK resources.')
           PY
           else
-            echo "::notice::Private font-assets release not found. Using CI system font fallback until uploaded."
-            fallback="$(fc-match -f '%{file}' 'DejaVu Sans' | head -n 1)"
-            test -s "$fallback"
-            for weight in light regular medium bold black; do
-              cp "$fallback" "app/src/main/res/font/thmanyah_${weight}.ttf"
-            done
+            echo "::error::Required private Thmanyah font release is unavailable; refusing to publish an incorrectly branded APK."
+            exit 1
           fi
 
       - name: Assemble debug APK
-        if: steps.prepare.outputs.ready == 'true'
-        run: bash gradlew assembleDebug --stacktrace --no-daemon
+                run: bash gradlew assembleDebug testDebugUnitTest --stacktrace --no-daemon
+
+      - name: Verify APK identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=app/build/outputs/apk/debug/app-debug.apk
+          test -s "$apk"
+          aapt="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -name aapt -type f | sort -V | tail -1)"
+          test -x "$aapt"
+          "$aapt" dump badging "$apk" | grep -E "^package: name='com\\.rouh\\.auto' "
+          "$aapt" dump badging "$apk" | grep -F "application-label:'ROUH Auto'"
 
       - name: Upload debug APK
-        if: steps.prepare.outputs.ready == 'true'
-        uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v4
         with:
           name: rouh-auto-debug-apk
           path: app/build/outputs/apk/debug/*.apk
@@ -158,4 +105,4 @@ jobs:
               --prerelease \
               --target "$GITHUB_SHA"
           fi
-          gh release upload latest-test release-output/car-launcher-next-debug.apk --clobber
+          gh release upload latest-test release-output/rouh-auto-debug.apk release-output/car-launcher-next-debug.apk --clobber
