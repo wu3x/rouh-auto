@@ -2,6 +2,7 @@ package org.wpfy.carlauncher.design.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -10,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.wpfy.carlauncher.design.theme.CarColors
@@ -32,19 +34,20 @@ fun CarRailButton(
             .clip(CarShapes.extraLarge)
             .then(
                 if (selected) {
-                    Modifier.background(CarColors.SurfaceContainer, CarShapes.extraLarge)
+                    Modifier.background(CarColors.AccentStrong.copy(alpha = 0.25f), CarShapes.extraLarge)
+                        .border(1.dp, CarColors.Accent.copy(alpha = 0.75f), CarShapes.extraLarge)
                 } else {
-                    Modifier
+                    Modifier.background(Color.Transparent)
                 },
             )
-            .clickable(onClick = onClick),
+            .clickable(onClickLabel = contentDescription, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
             modifier = Modifier.size(iconSize),
-            tint = if (selected) CarColors.TextPrimary else CarColors.TextSecondary,
+            tint = if (selected) CarColors.AccentMuted else CarColors.TextSecondary,
         )
     }
 }
