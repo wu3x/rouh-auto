@@ -56,7 +56,7 @@ fun MapDownloadDialog(onDismiss: () -> Unit) {
             scope.launch {
                 downloadState = try {
                     val message = OfflineMbtiles.install(context, uri)
-                    MapZoomState.setZoom(14f)
+                    MapZoomState.updateZoomLevel(14f)
                     message
                 }
                     catch (e: Exception) { "فشل الاستيراد: " + (e.message ?: "خطأ غير معروف") }
