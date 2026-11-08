@@ -35,14 +35,14 @@ internal object MapStyle {
     const val RetryAfterMillis = 30_000L
 
     /** Providers require an identifying User-Agent. */
-    const val UserAgent = "CarLauncher/1.3 (personal Android head-unit launcher)"
+    const val UserAgent = "ROUH-Auto/1.3 (Android car launcher)"
 
     /**
      * MapTiler API key (free plan). The repository must stay private because the key ends up
      * inside the APK; regenerate it in the MapTiler dashboard if it ever leaks. Leave blank to
      * use OpenStreetMap only.
      */
-    const val MapTilerKey = "uOWW3WySlSsHmhVtFxpN"
+    const val MapTilerKey = ""
 
     private const val MapTilerStyleId = "streets-v2-dark"
 
