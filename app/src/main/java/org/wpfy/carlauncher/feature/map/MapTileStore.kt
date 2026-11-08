@@ -52,6 +52,7 @@ internal object MapTileStore {
 
     @Volatile
     private var diskDirectory: File? = null
+    @Volatile private var appContext: Context? = null
     private var writesSinceTrim = 0
 
     private val _version = MutableStateFlow(0)
@@ -64,6 +65,7 @@ internal object MapTileStore {
     val version: StateFlow<Int> = _version.asStateFlow()
 
     fun init(context: Context) {
+        appContext = context.applicationContext
         if (diskDirectory != null) return
         synchronized(lock) {
             if (diskDirectory == null) {
@@ -74,7 +76,14 @@ internal object MapTileStore {
     }
 
     /** Returns the tile only if it is already in memory. Cheap enough to call while drawing. */
-    fun peek(zoom: Int, x: Int, y: Int): ImageBitmap? = memory.get(key(_source.value, zoom, x, y))
+    fun peek(zoom: Int, x: Int, y: Int): ImageBitmap? = memory.get("offline/$zoom/$x/$y") ?: memory.get(key(_source.value, zoom, x, y))
+
+    fun offlineMapChanged() {
+        memory.evictAll()
+        _version.update { it + 1 }
+    }
+
+    fun hasOfflineTile(zoom: Int, x: Int, y: Int): Boolean = appContext?.let { OfflineMbtiles.tile(it, zoom, x, y) != null } == true
 
     /** Loads a tile from disk or network in [scope]; no-op when already cached or in flight. */
     fun request(scope: CoroutineScope, zoom: Int, x: Int, y: Int) {
@@ -95,9 +104,10 @@ internal object MapTileStore {
         scope.launch(Dispatchers.IO) {
             try {
                 downloadPermits.withPermit {
-                    val tile = loadFromDisk(source, zoom, x, y) ?: download(source, zoom, x, y)
+                    val offline = appContext?.let { OfflineMbtiles.tile(it, zoom, x, y) }?.let { decode(it) }
+                    val tile = offline ?: loadFromDisk(source, zoom, x, y) ?: download(source, zoom, x, y)
                     if (tile != null) {
-                        memory.put(key, tile)
+                        memory.put(if (offline != null) "offline/$zoom/$x/$y" else key, tile)
                         synchronized(lock) { failedAt.remove(key) }
                         _version.update { it + 1 }
                     } else {
