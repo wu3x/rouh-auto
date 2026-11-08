@@ -83,7 +83,7 @@ internal object MapTileStore {
         _version.update { it + 1 }
     }
 
-    fun hasOfflineTile(zoom: Int, x: Int, y: Int): Boolean = appContext?.let { OfflineMbtiles.tile(it, zoom, x, y) != null } == true
+    fun isOfflineCached(zoom: Int, x: Int, y: Int): Boolean = memory.get("offline/$zoom/$x/$y") != null
 
     /** Loads a tile from disk or network in [scope]; no-op when already cached or in flight. */
     fun request(scope: CoroutineScope, zoom: Int, x: Int, y: Int) {
