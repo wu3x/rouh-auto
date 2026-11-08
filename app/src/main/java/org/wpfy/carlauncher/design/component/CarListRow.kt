@@ -1,6 +1,7 @@
 package org.wpfy.carlauncher.design.component
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
@@ -16,9 +17,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.wpfy.carlauncher.design.theme.CarColors
+import org.wpfy.carlauncher.design.theme.CarShapes
 
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
@@ -43,7 +46,9 @@ fun CarListRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 68.dp)
+            .heightIn(min = 72.dp)
+            .clip(CarShapes.small)
+            .background(CarColors.SurfaceContainer.copy(alpha = 0.55f))
             .then(clickModifier)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
