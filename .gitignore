@@ -70,3 +70,20 @@ Thumbs.db
 # Licensed font resources injected only during private builds
 /app/src/main/res/font/thmanyah_*.otf
 /app/src/main/res/font/thmanyah_*.ttf
+
+# Local secrets and credential exports
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.key
+*.asc
+*.mobileprovision
+*credentials*.json
+*service-account*.json
+google-services.json
+secrets.properties
+keystore.properties
+*.mbtiles
