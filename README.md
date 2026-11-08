@@ -88,8 +88,7 @@ Requirements: **JDK 17**, Android SDK with the configured compile SDK, and Gradl
 
 Output: `app/build/outputs/apk/debug/`
 
-> [!WARNING]
-> The GitHub Actions build obtains **Thmanyah Sans** font resources from a separate private release. Those font binaries are **not included in the repository**. A local build may require compatible font resources or adjustments to the font configuration.
+**Fonts:** Uses Android system sans-serif with Arabic fallback; no private font downloads are required.
 
 ## 🧭 Project status / حالة المشروع
 
