@@ -7,6 +7,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.MessageDigest
 
 /** Downloads the official raster MBTiles pack then passes it through the same validator as manual import. */
 internal object JazanMapDownloader {
@@ -14,6 +15,7 @@ internal object JazanMapDownloader {
     private const val MAP_URL =
         "https://github.com/wu3x/rouh-auto/releases/download/saudi-maps/jazan-offline-test.mbtiles"
     private const val MAX_BYTES = 512L * 1024 * 1024
+    private const val EXPECTED_SHA256 = "d505a1e8542c404c3eff08fdab0404b76dad63615c02e5140e70bc97fdf57a32"
 
     suspend fun download(context: Context, progress: (String) -> Unit): String = withContext(Dispatchers.IO) {
         val app = context.applicationContext
@@ -32,6 +34,7 @@ internal object JazanMapDownloader {
             }
             val length = connection.contentLengthLong
             require(length <= MAX_BYTES) { "حجم الملف يتجاوز الحد المسموح" }
+            val digest = MessageDigest.getInstance("SHA-256")
             var count = 0L
             connection.inputStream.use { input ->
                 temp.outputStream().use { output ->
@@ -42,6 +45,7 @@ internal object JazanMapDownloader {
                         count += n
                         require(count <= MAX_BYTES) { "الملف كبير جدًا" }
                         output.write(buffer, 0, n)
+                        digest.update(buffer, 0, n)
                         if (length > 0 && count % (1024 * 1024) < n) {
                             withContext(Dispatchers.Main) { progress("تنزيل جازان: " + count * 100 / length + "%") }
                         }
@@ -49,6 +53,8 @@ internal object JazanMapDownloader {
                 }
             }
             require(count > 4096) { "ملف التنزيل فارغ" }
+            val checksum = digest.digest().joinToString("") { "%02x".format(it) }
+            require(checksum == EXPECTED_SHA256) { "ملف الخريطة لا يطابق النسخة المعتمدة، أوقفنا التثبيت لحمايتك" }
             val result = OfflineMbtiles.install(app, Uri.fromFile(temp))
             MapZoomState.updateZoomLevel(14f)
             result
