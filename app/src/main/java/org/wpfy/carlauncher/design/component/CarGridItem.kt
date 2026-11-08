@@ -2,6 +2,8 @@ package org.wpfy.carlauncher.design.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -46,16 +48,18 @@ fun CarGridItem(
         modifier = modifier
             .height(156.dp)
             .clip(CarShapes.small)
+            .background(CarColors.SurfaceContainer)
+            .border(1.dp, CarColors.Outline.copy(alpha = 0.5f), CarShapes.small)
             .then(interactionModifier)
-            .padding(16.dp),
+            .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
-            modifier = Modifier.size(84.dp),
+            modifier = Modifier.size(76.dp),
             contentAlignment = Alignment.Center,
             content = icon,
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = label,
             modifier = Modifier.fillMaxWidth(),
