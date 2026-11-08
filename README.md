@@ -1,9 +1,13 @@
-<table>
-<tr>
-<td width="112" valign="middle"><img src="app/src/main/res/drawable-nodpi/rouh_auto_512.png" width="100" alt="ROUH Auto" style="border-radius: 14px;" /></td>
-<td valign="middle"><h1>ROUH Auto</h1><strong>مشغل لانشر لشاشات السيارات بنظام أندرويد البديلة</strong><br/><sub>A modern, landscape-first Android car launcher</sub></td>
-</tr>
-</table>
+<div align="center">
+
+<!-- Replace this temporary image with the new horizontal ROUH Auto banner once uploaded to the repository. -->
+<img src="app/src/main/res/drawable-nodpi/rouh_auto_512.png" width="320" alt="ROUH Auto" />
+
+### مشغل لانشر لشاشات السيارات بنظام أندرويد البديلة
+
+**A modern, landscape-first Android car launcher**
+
+</div>
 
 <div align="center">
 
