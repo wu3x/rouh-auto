@@ -1,5 +1,7 @@
 package org.wpfy.carlauncher.feature.map
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import kotlin.math.pow
@@ -61,6 +63,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import org.wpfy.carlauncher.R
@@ -97,7 +100,16 @@ fun MiniMap(
     val context = LocalContext.current
     val density = LocalDensity.current.density
     val location = rememberMiniMapLocation()
-    val sample = location.sample
+    val sample = location.sample?.takeUnless { location.isStale }
+    var selectedMode by remember { mutableStateOf<MapDisplayMode?>(null) }
+    var waitedForTiles by remember { mutableStateOf(false) }
+    LaunchedEffect(sample?.latitude, sample?.longitude) {
+        waitedForTiles = false
+        if (sample != null) {
+            delay(6_000L)
+            waitedForTiles = true
+        }
+    }
 
     remember(context) { MapTileStore.init(context) }
     val tileSource by MapTileStore.source.collectAsState()
@@ -105,7 +117,24 @@ fun MiniMap(
     val tileZoom = floor(zoomLevel).toInt().coerceIn(MapStyle.MinZoom.toInt(), MapStyle.MaxZoom.toInt())
     val zoomFraction = (zoomLevel - tileZoom).coerceIn(0f, 0.999f)
     val routePath = remember(route, tileZoom) { buildRoutePath(route, tileZoom) }
-    val decorativeIdle = MapStyle.DecorativeWhenIdle && route.isEmpty() && destination == null
+    val gpsFix = sample?.provider.equals("gps", ignoreCase = true)
+    val tileVersionForMode by MapTileStore.version.collectAsState()
+    val centerTileAvailable = if (sample != null) {
+        val cx = (lonToWorldX(sample.longitude) * (1 shl tileZoom)).toInt()
+        val cy = (latToWorldY(sample.latitude) * (1 shl tileZoom)).toInt()
+        tileVersionForMode // Observe tile arrival.
+        MapTileStore.peek(tileZoom, cx, cy) != null
+    } else false
+    val automaticMode = when {
+        sample == null -> MapDisplayMode.Decorative
+        centerTileAvailable && gpsFix -> MapDisplayMode.Gps
+        centerTileAvailable -> MapDisplayMode.Online
+        waitedForTiles -> MapDisplayMode.Decorative
+        gpsFix -> MapDisplayMode.Gps
+        else -> MapDisplayMode.Online
+    }
+    val displayMode = selectedMode ?: automaticMode
+    val decorativeIdle = displayMode == MapDisplayMode.Decorative
 
     // Heading: only follow GPS bearing while actually moving, and always rotate the short way.
     var unwrappedBearing by remember { mutableFloatStateOf(0f) }
@@ -148,7 +177,7 @@ fun MiniMap(
         val tilesPerSide = 1 shl zoom
         val worldSize = MapStyle.TileSizePx.toDouble() * tilesPerSide
 
-        if (sample != null) {
+        if (sample != null && !decorativeIdle) {
             val centerX = lonToWorldX(sample.longitude) * worldSize
             val centerY = latToWorldY(sample.latitude) * worldSize
             val centerTileX = floor(centerX / MapStyle.TileSizePx).toInt()
@@ -294,23 +323,45 @@ fun MiniMap(
                 ),
         )
 
-        val warning = location.statusMessage()
-        val statusText = warning ?: if (sample != null) "GPS متصل" else "ندور على إشارة GPS..."
-        if (statusText != null) {
-            Surface(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp),
-                color = CarColors.Background.copy(alpha = 0.78f),
-                shape = CarShapes.extraSmall,
-            ) {
-                Text(
-                    text = statusText,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    color = if (warning == null) Color(0xFF5BBF6B) else CarColors.TextSecondary,
-                    style = MaterialTheme.typography.labelMedium,
-                )
+        Row(
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            MapDisplayMode.entries.forEach { mode ->
+                val active = displayMode == mode
+                Surface(
+                    modifier = Modifier.size(if (active) 25.dp else 21.dp)
+                        .clickable { selectedMode = mode },
+                    shape = CircleShape,
+                    color = if (active) Color(0xFF3989F7) else Color(0xC9232B36),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp, if (active) Color.White.copy(alpha = 0.7f)
+                        else Color.White.copy(alpha = 0.2f),
+                    ),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = when (mode) {
+                                MapDisplayMode.Gps -> "G"
+                                MapDisplayMode.Online -> "N"
+                                MapDisplayMode.Decorative -> "D"
+                            },
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
             }
+        }
+        if (decorativeIdle) {
+            Text(
+                text = "خريطة توضيحية",
+                modifier = Modifier.align(Alignment.BottomStart).padding(9.dp),
+                color = Color.White.copy(alpha = 0.55f),
+                style = MaterialTheme.typography.labelSmall,
+            )
         }
 
         Column(
@@ -335,6 +386,8 @@ fun MiniMap(
         }
     }
 }
+
+private enum class MapDisplayMode { Gps, Online, Decorative }
 
 private data class MiniMapLocation(
     val sample: LocationSample?,
