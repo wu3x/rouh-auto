@@ -123,14 +123,7 @@ fun SettingsScreen(
                 onOpenNavigationApp = { panel = SettingsPanel.NavigationApp.name },
                 onCompatibilityModeChange = onCompatibilityModeChange,
                 onCopyDiagnostics = onCopyDiagnostics,
-                onOpenMaintenance = { panel = SettingsPanel.Maintenance.name },
-                onOpenVehicleDiscovery = { panel = SettingsPanel.VehicleDiscovery.name },
-                onOpenSystemTest = { panel = SettingsPanel.SystemTest.name },
             )
-
-            SettingsPanel.Maintenance -> MaintenanceScreen(onBack = { panel = SettingsPanel.Main.name })
-            SettingsPanel.VehicleDiscovery -> VehicleDiscoveryScreen(onBack = { panel = SettingsPanel.Main.name })
-            SettingsPanel.SystemTest -> SystemTestScreen(onBack = { panel = SettingsPanel.Main.name })
 
             SettingsPanel.StartupScreen -> OptionPicker(
                 title = stringResource(R.string.settings_startup_screen),
@@ -203,9 +196,6 @@ private fun SettingsList(
     onOpenNavigationApp: () -> Unit,
     onCompatibilityModeChange: (Boolean) -> Unit,
     onCopyDiagnostics: () -> Unit,
-    onOpenMaintenance: () -> Unit,
-    onOpenVehicleDiscovery: () -> Unit,
-    onOpenSystemTest: () -> Unit,
 ) {
     val context = LocalContext.current
     var greetingEnabled by remember { mutableStateOf(WelcomePreferences.enabled(context)) }
@@ -315,7 +305,7 @@ private fun SettingsList(
             )
             settingRow(
                 title = "تغيير اسم الترحيب",
-                subtitle = "أهلاً $greetingName",
+                subtitle = greetingName.takeIf { it.isNotBlank() }?.let { "أهلاً $it" } ?: "لم يتم تحديد اسم بعد",
                 onClick = {
                     nameDraft = greetingName
                     editGreeting = true
@@ -352,24 +342,6 @@ private fun SettingsList(
             )
 
             section(resources.getString(R.string.settings_section_system))
-            settingRow(
-                title = "اختبار النظام",
-                subtitle = "قياس أداء المعالج والذاكرة وسرعة التخزين بأرقام فعلية",
-                onClick = onOpenSystemTest,
-                showChevron = true,
-            )
-            settingRow(
-                title = "اكتشاف اتصال السيارة",
-                subtitle = "فحص خدمات CANBUS وواجهات USB والبلوتوث بدون تغيير أي شيء بالسيارة",
-                onClick = onOpenVehicleDiscovery,
-                showChevron = true,
-            )
-            settingRow(
-                title = "صيانة النظام",
-                subtitle = "التخزين والذاكرة • ملفات APK • اكتشاف المكررات وحذفها بموافقتك",
-                onClick = onOpenMaintenance,
-                showChevron = true,
-            )
             settingRow(
                 title = "ROUH Auto",
                 subtitle = resources.getString(R.string.settings_diagnostics_version, diagnostics.appVersion),
@@ -598,9 +570,6 @@ data class DeviceDiagnostics(
 
 private enum class SettingsPanel {
     Main,
-    Maintenance,
-    VehicleDiscovery,
-    SystemTest,
     StartupScreen,
     RailPosition,
     TextSize,
