@@ -141,7 +141,7 @@ fun MiniMap(
     val offlineCoverage = sample != null && OfflineMbtiles.installed(context) &&
         sample.longitude in 42.0757..43.4207 && sample.latitude in 16.4054..17.7435
     LaunchedEffect(offlineCoverage) {
-        if (offlineCoverage && MapZoomState.zoom > 14.99f) MapZoomState.setZoom(14f)
+        if (offlineCoverage && MapZoomState.zoom > 14.99f) MapZoomState.updateZoomLevel(14f)
     }
     val zoomLevel = if (offlineCoverage) MapZoomState.zoom.coerceAtMost(14.99f) else MapZoomState.zoom
     val tileZoom = floor(zoomLevel).toInt().coerceIn(MapStyle.MinZoom.toInt(), MapStyle.MaxZoom.toInt())
