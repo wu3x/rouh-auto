@@ -1,21 +1,23 @@
+<table>
+<tr>
+<td width="112" valign="middle"><img src="app/src/main/res/drawable-nodpi/rouh_auto_512.png" width="100" alt="ROUH Auto" style="border-radius: 14px;" /></td>
+<td valign="middle"><h1>ROUH Auto</h1><strong>مشغل لانشر لشاشات السيارات بنظام أندرويد البديلة</strong><br/><sub>A modern, landscape-first Android car launcher</sub></td>
+</tr>
+</table>
+
 <div align="center">
-
-<img src="app/src/main/res/drawable-nodpi/rouh_auto_512.png" width="180" alt="ROUH Auto — knight holding a white cat" />
-
-# ROUH Auto
-
-### لانشر عربي لشاشات السيارات بنظام أندرويد البديلة
-**A modern, landscape-first Android car launcher**
 
 [![Android](https://img.shields.io/badge/Android-9%2B-3DDC84?logo=android&logoColor=white)](https://developer.android.com/)
 [![Kotlin](https://img.shields.io/badge/Kotlin-Compose-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![UI](https://img.shields.io/badge/UI-Arabic%20%2F%20RTL-1787D4)](#-features--المميزات)
 [![Build](https://github.com/wu3x/rouh-auto/actions/workflows/build.yml/badge.svg)](https://github.com/wu3x/rouh-auto/actions/workflows/build.yml)
 [![Status](https://img.shields.io/badge/Status-Active%20development-F5A623)](#-project-status--حالة-المشروع)
+[![Download](https://img.shields.io/badge/Download-APK-228B22?logo=android&logoColor=white)](https://github.com/wu3x/rouh-auto/releases/download/latest-signed/rouh-auto-release.apk)
+[![Instagram](https://img.shields.io/badge/Instagram-%40wu3x-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/wu3x/)
 
-[**⬇️ Download APK / تحميل التطبيق**](https://github.com/wu3x/rouh-auto/releases/tag/latest-test) ·
-[**🛠️ Build status / حالة البناء**](https://github.com/wu3x/rouh-auto/actions/workflows/build.yml) ·
-[**📂 Source / الملفات**](app/src/main/java/org/wpfy/carlauncher)
+[**⬇️ تحميل التطبيق APK**](https://github.com/wu3x/rouh-auto/releases/download/latest-signed/rouh-auto-release.apk) ·
+[**🛠️ حالة البناء**](https://github.com/wu3x/rouh-auto/actions/workflows/build.yml) ·
+[**📂 الملفات**](app/src/main/java/org/wpfy/carlauncher)
 
 </div>
 
@@ -58,8 +60,8 @@ ROUH Auto is a native Android home-screen replacement built with **Kotlin + Jetp
 
 ## 📲 Installation / التثبيت
 
-1. افتح [**Latest Test Release**](https://github.com/wu3x/rouh-auto/releases/tag/latest-test).
-2. نزّل ملف **APK** من قسم **Assets**.
+1. افتح [**تحميل ROUH Auto APK الموقّع مباشرة**](https://github.com/wu3x/rouh-auto/releases/download/latest-signed/rouh-auto-release.apk).
+2. سيبدأ تنزيل ملف **rouh-auto-release.apk** مباشرة.
 3. ثبّته على شاشة أندرويد، واسمح بالتثبيت من المصدر عند الحاجة.
 4. امنح الأذونات المطلوبة للميزات التي ترغب باستخدامها، واختر **ROUH Auto** كتطبيق الشاشة الرئيسية إذا رغبت.
 
@@ -78,7 +80,7 @@ ROUH Auto is a native Android home-screen replacement built with **Kotlin + Jetp
 | Persistence | Android DataStore / local preferences |
 | Background tasks | Kotlin Coroutines |
 | Build | Gradle + GitHub Actions |
-| Distribution | GitHub Releases (test APK) |
+| Distribution | GitHub Releases (signed release APK + debug test APK) |
 
 ## 🛠️ Build from source / بناء المشروع
 
