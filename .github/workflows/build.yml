@@ -62,6 +62,8 @@ jobs:
           fi
 
       - name: Assemble debug APK
+        env:
+          ROUH_BUILD_NUMBER: ${{ github.run_number }}
         run: bash gradlew assembleDebug testDebugUnitTest --stacktrace --no-daemon
 
       - name: Verify APK identity
