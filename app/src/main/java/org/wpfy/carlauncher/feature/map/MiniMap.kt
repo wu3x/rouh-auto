@@ -157,12 +157,13 @@ fun MiniMap(
     val tileSource by MapTileStore.source.collectAsState()
     val offlineCoverage = mapCenter != null && OfflineMbtiles.installed(context) &&
         mapCenter.longitude in 42.0757..43.4207 && mapCenter.latitude in 16.4054..17.7435
-    LaunchedEffect(offlineCoverage) {
-        if (offlineCoverage && MapZoomState.zoom > 14.99f) MapZoomState.updateZoomLevel(14f)
-    }
-    val zoomLevel = if (offlineCoverage) MapZoomState.zoom.coerceAtMost(14.99f) else MapZoomState.zoom
-    val tileZoom = floor(zoomLevel).toInt().coerceIn(MapStyle.MinZoom.toInt(), MapStyle.MaxZoom.toInt())
-    val zoomFraction = (zoomLevel - tileZoom).coerceIn(0f, 0.999f)
+    // Offline Jazan tiles stop at z14. Render them at a higher visual zoom instead
+    // of forcing the whole map back to z14 (which makes streets and the GPS puck tiny).
+    // This preserves offline operation; magnified tiles may look softer at high zoom.
+    val zoomLevel = MapZoomState.zoom
+    val tileZoom = floor(zoomLevel).toInt()
+        .coerceIn(MapStyle.MinZoom.toInt(), if (offlineCoverage) 14 else MapStyle.MaxZoom.toInt())
+    val zoomFraction = (zoomLevel - tileZoom).coerceIn(0f, if (offlineCoverage) 3.5f else 0.999f)
     val routePath = remember(route, tileZoom) { buildRoutePath(route, tileZoom) }
     val gpsFix = sample?.provider.equals("gps", ignoreCase = true)
     val tileVersionForMode by MapTileStore.version.collectAsState()
