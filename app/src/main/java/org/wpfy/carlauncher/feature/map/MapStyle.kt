@@ -5,7 +5,7 @@ package org.wpfy.carlauncher.feature.map
  * Offline MBTiles take priority; OpenStreetMap is used when network access is available.
  */
 internal object MapStyle {
-    const val DefaultZoom = 17f
+    const val DefaultZoom = 17.5f
     const val MinZoom = 9f
     const val MaxZoom = 18.99f
     const val TileScale = 1.15f
