@@ -56,6 +56,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import android.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
@@ -130,6 +133,12 @@ fun MiniMap(
     val zoomLevel = MapZoomState.zoom
     val tileZoom = floor(zoomLevel).toInt().coerceIn(MapStyle.MinZoom.toInt(), MapStyle.MaxZoom.toInt())
     val zoomFraction = (zoomLevel - tileZoom).coerceIn(0f, 0.999f)
+    val arabicLabels by ArabicMapLabels.labels.collectAsState()
+    val labelCell = mapCenter?.let { Pair(kotlin.math.floor(it.latitude / 0.06).toInt(), kotlin.math.floor(it.longitude / 0.06).toInt()) }
+    LaunchedEffect(labelCell) {
+        val center = mapCenter
+        if (center != null) ArabicMapLabels.update(context, center.latitude, center.longitude)
+    }
     val routePath = remember(route, tileZoom) { buildRoutePath(route, tileZoom) }
     val gpsFix = sample?.provider.equals("gps", ignoreCase = true)
     val tileVersionForMode by MapTileStore.version.collectAsState()
@@ -266,6 +275,31 @@ fun MiniMap(
                                     else -> null
                                 },
                             )
+                        }
+                    }
+
+                    // Arabic names are a transparent overlay; underlying map tiles are untouched.
+                    if (zoomLevel >= 11f && arabicLabels.isNotEmpty()) {
+                        val occupied = HashSet<Pair<Int, Int>>()
+                        val ordered = arabicLabels.sortedByDescending { it.place }
+                        drawIntoCanvas { composeCanvas ->
+                            val native = composeCanvas.nativeCanvas
+                            val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                                typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.BOLD)
+                                textAlign = Paint.Align.CENTER
+                                color = android.graphics.Color.WHITE
+                                setShadowLayer(3.5f * density, 0f, 1f * density, android.graphics.Color.BLACK)
+                            }
+                            ordered.forEach { label ->
+                                if (!label.place && zoomLevel < 15f) return@forEach
+                                val x = center.x + ((lonToWorldX(label.lon) * worldSize - centerX) * pxPerWorld).toFloat()
+                                val y = center.y + ((latToWorldY(label.lat) * worldSize - centerY) * pxPerWorld).toFloat()
+                                if (x < 35f || x > size.width - 35f || y < 30f || y > size.height - 30f) return@forEach
+                                val cell = Pair((x / (110f * density)).toInt(), (y / (34f * density)).toInt())
+                                if (!occupied.add(cell)) return@forEach
+                                paint.textSize = (if (label.place) 13f else 10.5f) * density
+                                native.drawText(label.name, x, y, paint)
+                            }
                         }
                     }
 
