@@ -117,6 +117,7 @@ fun SettingsScreen(
                 onOpenHomeSettings = onOpenHomeSettings,
                 onOpenUpdates = { panel = SettingsPanel.Updates.name },
                 onOpenBluetoothDiagnostics = { panel = SettingsPanel.BluetoothDiagnostics.name },
+                onOpenSystemHealth = { panel = SettingsPanel.SystemHealth.name },
                 onStartOnBootChange = onStartOnBootChange,
                 onOpenStartupScreen = { panel = SettingsPanel.StartupScreen.name },
                 onOpenRailPosition = { panel = SettingsPanel.RailPosition.name },
@@ -129,6 +130,7 @@ fun SettingsScreen(
 
             SettingsPanel.Updates -> UpdatesScreen(onBack = { panel = SettingsPanel.Main.name })
             SettingsPanel.BluetoothDiagnostics -> BluetoothDiagnosticsScreen(onBack = { panel = SettingsPanel.Main.name })
+            SettingsPanel.SystemHealth -> SystemHealthScreen(onBack = { panel = SettingsPanel.Main.name })
 
             SettingsPanel.StartupScreen -> OptionPicker(
                 title = stringResource(R.string.settings_startup_screen),
@@ -196,6 +198,7 @@ private fun SettingsList(
     onStartOnBootChange: (Boolean) -> Unit,
     onOpenUpdates: () -> Unit,
     onOpenBluetoothDiagnostics: () -> Unit,
+    onOpenSystemHealth: () -> Unit,
     onOpenStartupScreen: () -> Unit,
     onOpenRailPosition: () -> Unit,
     onOpenTextSize: () -> Unit,
@@ -349,6 +352,12 @@ private fun SettingsList(
             )
 
             section(resources.getString(R.string.settings_section_system))
+            settingRow(
+                title = "فحص النظام وتنظيفه",
+                subtitle = "فحص حقيقي للذاكرة والتخزين وتطبيقات المصنع — للقراءة فقط",
+                onClick = onOpenSystemHealth,
+                showChevron = true,
+            )
             settingRow(
                 title = "تشخيص بلوتوث الشاشة",
                 subtitle = "فحص خدمات الشركة المصنّعة وMCU ونسخ التقرير",
@@ -591,6 +600,7 @@ private enum class SettingsPanel {
     Main,
     Updates,
     BluetoothDiagnostics,
+    SystemHealth,
     StartupScreen,
     RailPosition,
     TextSize,
