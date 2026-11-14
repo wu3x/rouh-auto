@@ -115,6 +115,7 @@ fun SettingsScreen(
                 isDefaultHome = isDefaultHome,
                 notificationAccess = notificationAccess,
                 onOpenHomeSettings = onOpenHomeSettings,
+                onOpenUpdates = { panel = SettingsPanel.Updates.name },
                 onStartOnBootChange = onStartOnBootChange,
                 onOpenStartupScreen = { panel = SettingsPanel.StartupScreen.name },
                 onOpenRailPosition = { panel = SettingsPanel.RailPosition.name },
@@ -124,6 +125,8 @@ fun SettingsScreen(
                 onCompatibilityModeChange = onCompatibilityModeChange,
                 onCopyDiagnostics = onCopyDiagnostics,
             )
+
+            SettingsPanel.Updates -> UpdatesScreen(onBack = { panel = SettingsPanel.Main.name })
 
             SettingsPanel.StartupScreen -> OptionPicker(
                 title = stringResource(R.string.settings_startup_screen),
@@ -189,6 +192,7 @@ private fun SettingsList(
     notificationAccess: Boolean,
     onOpenHomeSettings: () -> Unit,
     onStartOnBootChange: (Boolean) -> Unit,
+    onOpenUpdates: () -> Unit,
     onOpenStartupScreen: () -> Unit,
     onOpenRailPosition: () -> Unit,
     onOpenTextSize: () -> Unit,
@@ -342,6 +346,12 @@ private fun SettingsList(
             )
 
             section(resources.getString(R.string.settings_section_system))
+            settingRow(
+                title = "التحديثات",
+                subtitle = "التحقق من آخر إصدار وتنزيله وتثبيته مباشرة",
+                onClick = onOpenUpdates,
+                showChevron = true,
+            )
             settingRow(
                 title = "ROUH Auto",
                 subtitle = resources.getString(R.string.settings_diagnostics_version, diagnostics.appVersion),
@@ -570,6 +580,7 @@ data class DeviceDiagnostics(
 
 private enum class SettingsPanel {
     Main,
+    Updates,
     StartupScreen,
     RailPosition,
     TextSize,
