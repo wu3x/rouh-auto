@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
@@ -94,11 +95,12 @@ internal fun BluetoothDiagnosticsScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     var report by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
+    var testResult by remember { mutableStateOf("") }
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         CarHeader(title = "تشخيص بلوتوث الشاشة")
         Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("فحص قراءة فقط لخدمات البلوتوث وMCU المرئية للتطبيق. لا يغيّر إعدادات الشاشة ولا يرسل أوامر.")
+            Text("الفحص للقراءة فقط. اختبار تشغيل الخدمة إجراء منفصل يدوي. جرّبه والسيارة واقفة.")
             Button(enabled = !busy, onClick = {
                 busy = true
                 scope.launch {
@@ -107,6 +109,24 @@ internal fun BluetoothDiagnosticsScreen(onBack: () -> Unit) {
                     busy = false
                 }
             }) { Text(if (busy) "جارٍ الفحص..." else "فحص خدمات الشركة المصنّعة وMCU") }
+
+            Text("شغّل أغنية من الجوال والصوت ساكت، ثم جرّب تفعيل خدمة المصنع يدويًا.")
+            Button(enabled = !busy, onClick = {
+                val component = ComponentName("com.hcn.bluetoothservice", "com.hcn.bluetooth.service.BluetoothMusicService")
+                testResult = runCatching {
+                    val started = context.startService(Intent().setComponent(component))
+                    if (started == null) "لم يقبل أندرويد بدء الخدمة (null)."
+                    else "قبل أندرويد طلب بدء الخدمة: " + started.flattenToShortString() + ". هذا لا يؤكد تشغيل الصوت."
+                }.getOrElse { "رفض بدء الخدمة: " + it.javaClass.simpleName + ": " + it.message.orEmpty().take(240) }
+            }) { Text("اختبار تفعيل Bluetooth Music") }
+            if (testResult.isNotBlank()) {
+                Text(testResult)
+                Button(onClick = {
+                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    clipboard.setPrimaryClip(ClipData.newPlainText("ROUH Bluetooth service test", testResult))
+                    android.widget.Toast.makeText(context, "تم نسخ النتيجة", android.widget.Toast.LENGTH_SHORT).show()
+                }) { Text("نسخ نتيجة الاختبار") }
+            }
             if (report.isNotBlank()) {
                 Button(onClick = {
                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
