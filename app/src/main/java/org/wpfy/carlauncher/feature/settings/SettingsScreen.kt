@@ -116,6 +116,7 @@ fun SettingsScreen(
                 notificationAccess = notificationAccess,
                 onOpenHomeSettings = onOpenHomeSettings,
                 onOpenUpdates = { panel = SettingsPanel.Updates.name },
+                onOpenBluetoothDiagnostics = { panel = SettingsPanel.BluetoothDiagnostics.name },
                 onStartOnBootChange = onStartOnBootChange,
                 onOpenStartupScreen = { panel = SettingsPanel.StartupScreen.name },
                 onOpenRailPosition = { panel = SettingsPanel.RailPosition.name },
@@ -127,6 +128,7 @@ fun SettingsScreen(
             )
 
             SettingsPanel.Updates -> UpdatesScreen(onBack = { panel = SettingsPanel.Main.name })
+            SettingsPanel.BluetoothDiagnostics -> BluetoothDiagnosticsScreen(onBack = { panel = SettingsPanel.Main.name })
 
             SettingsPanel.StartupScreen -> OptionPicker(
                 title = stringResource(R.string.settings_startup_screen),
@@ -193,6 +195,7 @@ private fun SettingsList(
     onOpenHomeSettings: () -> Unit,
     onStartOnBootChange: (Boolean) -> Unit,
     onOpenUpdates: () -> Unit,
+    onOpenBluetoothDiagnostics: () -> Unit,
     onOpenStartupScreen: () -> Unit,
     onOpenRailPosition: () -> Unit,
     onOpenTextSize: () -> Unit,
@@ -346,6 +349,12 @@ private fun SettingsList(
             )
 
             section(resources.getString(R.string.settings_section_system))
+            settingRow(
+                title = "تشخيص بلوتوث الشاشة",
+                subtitle = "فحص خدمات الشركة المصنّعة وMCU ونسخ التقرير",
+                onClick = onOpenBluetoothDiagnostics,
+                showChevron = true,
+            )
             settingRow(
                 title = "التحديثات",
                 subtitle = "التحقق من آخر إصدار وتنزيله وتثبيته مباشرة",
@@ -581,6 +590,7 @@ data class DeviceDiagnostics(
 private enum class SettingsPanel {
     Main,
     Updates,
+    BluetoothDiagnostics,
     StartupScreen,
     RailPosition,
     TextSize,
