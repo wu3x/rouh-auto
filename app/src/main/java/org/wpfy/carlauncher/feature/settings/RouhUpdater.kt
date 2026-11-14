@@ -43,8 +43,8 @@ internal object RouhUpdater {
             require(connection.responseCode == 200) { "تعذر الاتصال بـ GitHub (${connection.responseCode})" }
             val release = JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
             val body = release.optString("body")
-            fun field(key: String): String = Regex("$key: ([^\\\\n\\r ]+)").find(body)?.groupValues?.get(1)
-                ?.trim()?.trimEnd('\\') ?: ""
+            fun field(key: String): String =
+                Regex("""$key: ([^\\\\\\s]+)""").find(body)?.groupValues?.get(1).orEmpty()
             val code = field("versionCode").toLongOrNull() ?: error("الإصدار المنشور ما فيه رقم بناء معتمد")
             val name = field("versionName").ifBlank { "1.3.$code" }
             val checksum = field("sha256").lowercase()
