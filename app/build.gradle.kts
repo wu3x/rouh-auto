@@ -15,7 +15,7 @@ android {
         targetSdk      = 36
         // CI run numbers increase on each build; local builds retain the development baseline.
         versionCode    = (System.getenv("ROUH_BUILD_NUMBER")?.toIntOrNull() ?: 10)
-        versionName    = "1.2"
+        versionName    = "1.3.${System.getenv("ROUH_BUILD_NUMBER")?.toIntOrNull() ?: 0}"
     }
 
     // Release signing is enabled only when CI provides all required secrets.
