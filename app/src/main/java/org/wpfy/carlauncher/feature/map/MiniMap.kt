@@ -101,38 +101,10 @@ fun MiniMap(
     if (LocalInspectionMode.current) return
 
     val context = LocalContext.current
-    var mapPromptHidden by remember { mutableStateOf(MapDownloadPreferences.isPromptHidden(context)) }
-    var showMapDownloadDialog by remember { mutableStateOf(false) }
-    var showHideConfirmation by remember { mutableStateOf(false) }
-    if (showMapDownloadDialog) {
-        MapDownloadDialog(onDismiss = { showMapDownloadDialog = false })
-    }
-    if (showHideConfirmation) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { showHideConfirmation = false },
-            title = { Text("اقتراح تحميل الخرائط") },
-            text = { Text("إخفاء الاقتراح في المرات القادمة؟ تقدر ترجع له من الإعدادات في أي وقت.") },
-            confirmButton = {
-                TextButton(onClick = {
-                    MapDownloadPreferences.setPromptHidden(context, true)
-                    mapPromptHidden = true
-                    showHideConfirmation = false
-                }) { Text("عدم الإظهار مرة أخرى") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showHideConfirmation = false }) { Text("إلغاء") }
-            },
-        )
-    }
     val density = LocalDensity.current.density
     val location = rememberMiniMapLocation()
     val sample = location.sample?.takeUnless { location.isStale }
-    var browseJazan by remember { mutableStateOf(false) }
-    val mapCenter = if (browseJazan && OfflineMbtiles.installed(context)) {
-        GeoPoint(latitude = 16.8894, longitude = 42.5706)
-    } else {
-        sample?.let { GeoPoint(latitude = it.latitude, longitude = it.longitude) }
-    }
+    val mapCenter = sample?.let { GeoPoint(latitude = it.latitude, longitude = it.longitude) }
     // A pinned choice survives launcher restarts and is never overridden by auto-detection.
     val modePreferences = remember(context) {
         context.applicationContext.getSharedPreferences("rouh_map_mode", Context.MODE_PRIVATE)
@@ -155,15 +127,9 @@ fun MiniMap(
 
     remember(context) { MapTileStore.init(context) }
     val tileSource by MapTileStore.source.collectAsState()
-    val offlineCoverage = mapCenter != null && OfflineMbtiles.installed(context) &&
-        mapCenter.longitude in 42.0757..43.4207 && mapCenter.latitude in 16.4054..17.7435
-    // Offline Jazan tiles stop at z14. Render them at a higher visual zoom instead
-    // of forcing the whole map back to z14 (which makes streets and the GPS puck tiny).
-    // This preserves offline operation; magnified tiles may look softer at high zoom.
     val zoomLevel = MapZoomState.zoom
-    val tileZoom = floor(zoomLevel).toInt()
-        .coerceIn(MapStyle.MinZoom.toInt(), if (offlineCoverage) 14 else MapStyle.MaxZoom.toInt())
-    val zoomFraction = (zoomLevel - tileZoom).coerceIn(0f, if (offlineCoverage) 3.5f else 0.999f)
+    val tileZoom = floor(zoomLevel).toInt().coerceIn(MapStyle.MinZoom.toInt(), MapStyle.MaxZoom.toInt())
+    val zoomFraction = (zoomLevel - tileZoom).coerceIn(0f, 0.999f)
     val routePath = remember(route, tileZoom) { buildRoutePath(route, tileZoom) }
     val gpsFix = sample?.provider.equals("gps", ignoreCase = true)
     val tileVersionForMode by MapTileStore.version.collectAsState()
@@ -175,10 +141,10 @@ fun MiniMap(
     } else false
     val automaticMode = when {
         mapCenter == null -> MapDisplayMode.Decorative
-        centerTileAvailable && gpsFix && !browseJazan -> MapDisplayMode.Gps
+        centerTileAvailable && gpsFix -> MapDisplayMode.Gps
         centerTileAvailable -> MapDisplayMode.Online
         waitedForTiles -> MapDisplayMode.Decorative
-        gpsFix && !browseJazan -> MapDisplayMode.Gps
+        gpsFix -> MapDisplayMode.Gps
         else -> MapDisplayMode.Online
     }
     val displayMode = when (selectedMode) {
@@ -211,7 +177,7 @@ fun MiniMap(
         }
     }
     val animatedBearing by animateFloatAsState(
-        targetValue = if (browseJazan) 0f else unwrappedBearing,
+        targetValue = unwrappedBearing,
         animationSpec = tween(durationMillis = 900, easing = LinearOutSlowInEasing),
         label = "mini-map-heading",
     )
@@ -296,7 +262,6 @@ fun MiniMap(
                                 dstOffset = IntOffset(left.roundToInt(), top.roundToInt()),
                                 dstSize = tileSize,
                                 colorFilter = when {
-                                    MapTileStore.isOfflineCached(zoom, tx.mod(tilesPerSide), ty) -> null
                                     tileSource.needsDarkFilter -> DarkTileFilter
                                     else -> null
                                 },
@@ -340,7 +305,7 @@ fun MiniMap(
                 }
 
                 // Only show live-location accuracy while following the device.
-                if (!browseJazan && sample != null) drawCircle(
+                if (sample != null) drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
                             CarColors.AccentStrong.copy(alpha = 0.32f),
@@ -453,63 +418,12 @@ fun MiniMap(
             )
         }
 
-        if (!mapPromptHidden && selectedMode == null && !OfflineMbtiles.installed(context)) {
-            Row(
-                modifier = Modifier.align(Alignment.BottomStart).padding(start = 8.dp, bottom = 28.dp),
-                horizontalArrangement = Arrangement.spacedBy(3.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Surface(
-                    onClick = { showMapDownloadDialog = true },
-                    color = Color(0xE51B2B3E),
-                    shape = CarShapes.extraSmall,
-                ) {
-                    Text(
-                        text = "↓ تحميل خرائط السعودية",
-                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelSmall,
-                    )
-                }
-                Surface(
-                    onClick = { showHideConfirmation = true },
-                    color = Color(0xC91B2B3E),
-                    shape = CarShapes.extraSmall,
-                ) {
-                    Text(
-                        text = "×",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelSmall,
-                    )
-                }
-            }
-        }
-
         Column(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .padding(end = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            if (OfflineMbtiles.installed(context)) {
-                Surface(
-                    onClick = {
-                        browseJazan = !browseJazan
-                        selectedMode = null
-                        if (browseJazan) MapZoomState.updateZoomLevel(12f)
-                    },
-                    color = if (browseJazan) Color(0xFF3989F7) else Color(0xD9232B36),
-                    shape = CircleShape,
-                ) {
-                    Text(
-                        text = if (browseJazan) "↩" else "ج",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelSmall,
-                    )
-                }
-            }
             ZoomButton(icon = Icons.Rounded.Add, label = "+") { MapZoomState.zoomBy(1f) }
             ZoomButton(icon = Icons.Rounded.Remove, label = "-") { MapZoomState.zoomBy(-1f) }
         }
