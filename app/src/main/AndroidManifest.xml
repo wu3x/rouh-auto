@@ -16,6 +16,10 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent>
+        <!-- Read-only discovery of Bluetooth vendor media services. -->
+        <intent><action android:name="android.bluetooth.a2dp-sink.profile.action.CONNECTION_STATE_CHANGED" /></intent>
+        <intent><action android:name="android.bluetooth.avrcp-controller.profile.action.CONNECTION_STATE_CHANGED" /></intent>
+        <intent><action android:name="android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED" /></intent>
         <!-- Voice destination search. -->
         <intent>
             <action android:name="android.speech.action.RECOGNIZE_SPEECH" />
