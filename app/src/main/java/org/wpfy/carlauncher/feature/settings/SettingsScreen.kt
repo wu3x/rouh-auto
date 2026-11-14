@@ -80,7 +80,7 @@ fun SettingsRoute(stateHolder: SettingsStateHolder) {
         onPreferredMediaAppChange = stateHolder::setPreferredMediaApp,
         onNavigationAppChange = stateHolder::setNavigationApp,
         onCompatibilityModeChange = stateHolder::setNavigationCompatibilityMode,
-        onCopyDiagnostics = { copyDiagnostics(context, diagnostics.copyText) },
+        onCopyDiagnostics = { copyDiagnostics(context, FullDeviceReport.collect(context)) },
     )
 }
 
@@ -370,8 +370,8 @@ private fun SettingsList(
             settingRow(title = resources.getString(R.string.settings_diagnostics_display), subtitle = diagnostics.display)
             settingRow(title = resources.getString(R.string.settings_diagnostics_permissions), subtitle = diagnostics.permissions)
             settingRow(
-                title = resources.getString(R.string.settings_diagnostics_copy),
-                subtitle = resources.getString(R.string.settings_diagnostics_copy_summary),
+                title = "نسخ بيانات وتفاصيل الجهاز",
+                subtitle = "تقرير العتاد والنظام والـ MCU للبحث عن تحديث كامل للشاشة",
                 onClick = onCopyDiagnostics,
                 showChevron = true,
             )
