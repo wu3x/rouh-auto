@@ -52,19 +52,24 @@ import org.wpfy.carlauncher.design.component.CarListRow
 import org.wpfy.carlauncher.design.theme.CarColors
 import org.wpfy.carlauncher.design.theme.CarSpacing
 import org.wpfy.carlauncher.feature.settings.SettingsStateHolder
+import org.wpfy.carlauncher.feature.startup.StartupCompanionPicker
 
 @Composable
 fun OnboardingRoute(stateHolder: SettingsStateHolder) {
     var stepName by rememberSaveable { mutableStateOf(OnboardingStep.Setup.name) }
     val step = runCatching { OnboardingStep.valueOf(stepName) }.getOrDefault(OnboardingStep.Setup)
+    var companionPickerOpen by rememberSaveable { mutableStateOf(false) }
     var selectedRailName by rememberSaveable { mutableStateOf<String?>(null) }
 
     // Skip is intended for emulator/desktop testing. Permissions can be granted later in Settings.
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-    when (step) {
+    if (companionPickerOpen) {
+        StartupCompanionPicker(onBack = { companionPickerOpen = false })
+    } else when (step) {
         OnboardingStep.Setup -> SetupScreen(
             onContinue = { stepName = nextOnboardingStep(OnboardingStep.Setup).name },
             onSkip = { stateHolder.completeOnboarding(RailPosition.Left) },
+            onCompanionPicker = { companionPickerOpen = true },
         )
 
         OnboardingStep.RailPosition -> RailPositionScreen(
@@ -80,7 +85,7 @@ fun OnboardingRoute(stateHolder: SettingsStateHolder) {
 }
 
 @Composable
-private fun SetupScreen(onContinue: () -> Unit, onSkip: () -> Unit) {
+private fun SetupScreen(onContinue: () -> Unit, onSkip: () -> Unit, onCompanionPicker: () -> Unit) {
     val context = LocalContext.current
     val activity = remember(context) { context.findComponentActivity() }
     var refreshGeneration by remember { mutableIntStateOf(0) }
@@ -147,6 +152,11 @@ private fun SetupScreen(onContinue: () -> Unit, onSkip: () -> Unit) {
             },
             satisfied = status.defaultHome,
             onClick = { openSystemSettings(context, Settings.ACTION_HOME_SETTINGS) },
+        )
+        CarListRow(
+            title = "تشغيل تطبيق أصلي عند بدء اللانشر (اختياري)",
+            subtitle = "اختر مشغل موسيقى البلوتوث من تطبيقات الجهاز والنظام",
+            onClick = onCompanionPicker,
         )
     }
 }
