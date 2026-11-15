@@ -76,7 +76,7 @@ internal fun UpdatesScreen(onBack: () -> Unit) {
         Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Text("الإصدار المثبت: $installedName (بناء $installed)", color = CarColors.TextSecondary)
             release?.let {
-                Text("آخر إصدار: ${it.versionName} (بناء ${it.versionCode})", style = MaterialTheme.typography.titleMedium)
+                Text("آخر إصدار: ${it.versionName} (بناء ${it.versionCode})", color = CarColors.TextPrimary, style = MaterialTheme.typography.titleMedium)
             }
             Surface(color = Color(0xFF1D2938), shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
