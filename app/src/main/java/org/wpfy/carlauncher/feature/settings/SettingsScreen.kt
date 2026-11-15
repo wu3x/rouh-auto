@@ -119,6 +119,7 @@ fun SettingsScreen(
                 onOpenBluetoothDiagnostics = { panel = SettingsPanel.BluetoothDiagnostics.name },
                 onOpenSystemHealth = { panel = SettingsPanel.SystemHealth.name },
                 onOpenMapNames = { panel = SettingsPanel.MapNames.name },
+                onOpenMapAppearance = { panel = SettingsPanel.MapAppearance.name },
                 onStartOnBootChange = onStartOnBootChange,
                 onOpenStartupScreen = { panel = SettingsPanel.StartupScreen.name },
                 onOpenRailPosition = { panel = SettingsPanel.RailPosition.name },
@@ -133,6 +134,7 @@ fun SettingsScreen(
             SettingsPanel.BluetoothDiagnostics -> BluetoothDiagnosticsScreen(onBack = { panel = SettingsPanel.Main.name })
             SettingsPanel.SystemHealth -> SystemHealthScreen(onBack = { panel = SettingsPanel.Main.name })
             SettingsPanel.MapNames -> MapNamesScreen(onBack = { panel = SettingsPanel.Main.name })
+            SettingsPanel.MapAppearance -> MapAppearanceScreen(onBack = { panel = SettingsPanel.Main.name })
 
             SettingsPanel.StartupScreen -> OptionPicker(
                 title = stringResource(R.string.settings_startup_screen),
@@ -202,6 +204,7 @@ private fun SettingsList(
     onOpenBluetoothDiagnostics: () -> Unit,
     onOpenSystemHealth: () -> Unit,
     onOpenMapNames: () -> Unit,
+    onOpenMapAppearance: () -> Unit,
     onOpenStartupScreen: () -> Unit,
     onOpenRailPosition: () -> Unit,
     onOpenTextSize: () -> Unit,
@@ -327,6 +330,12 @@ private fun SettingsList(
             )
 
             section(resources.getString(R.string.settings_section_appearance))
+            settingRow(
+                title = "مظهر الخريطة",
+                subtitle = "الوضع الحالي، Classic، Midnight، Minimal، 3D، تلقائي",
+                onClick = onOpenMapAppearance,
+                showChevron = true,
+            )
             settingRow(
                 title = resources.getString(R.string.settings_theme),
                 subtitle = resources.getString(R.string.settings_theme_dark),
@@ -606,6 +615,7 @@ data class DeviceDiagnostics(
 }
 
 private enum class SettingsPanel {
+    MapAppearance,
     Main,
     Updates,
     BluetoothDiagnostics,
