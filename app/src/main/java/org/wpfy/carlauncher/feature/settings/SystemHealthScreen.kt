@@ -34,6 +34,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.wpfy.carlauncher.design.component.CarHeader
+import org.wpfy.carlauncher.design.component.CarIconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.ui.graphics.Color
 
 /**
  * Observes actual device metrics and visible package metadata. Does not modify packages,
@@ -127,7 +131,7 @@ internal fun SystemHealthScreen(onBack: () -> Unit) {
     var report by remember { mutableStateOf("") }
     var cleanupResult by remember { mutableStateOf("") }
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        CarHeader(title = "فحص النظام وتنظيفه")
+        CarHeader(title = "فحص النظام وتنظيفه", leading = { CarIconButton(icon = Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "رجوع", onClick = onBack) })
         Column(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -142,6 +146,7 @@ internal fun SystemHealthScreen(onBack: () -> Unit) {
                 }
             }) { Text(if (busy) "جارٍ فحص الجهاز..." else "بدء فحص النظام الشامل") }
             if (report.isNotBlank()) {
+                Text(if (report.startsWith("فشل")) "تعذر الفحص" else "اكتمل الفحص — التقرير بالأسفل", color = Color.White)
                 Button(onClick = {
                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     clipboard.setPrimaryClip(ClipData.newPlainText("ROUH system health report", report))
@@ -158,7 +163,7 @@ internal fun SystemHealthScreen(onBack: () -> Unit) {
                     busy = false
                 }
             }) { Text("تنظيف ملفات ROUH المؤقتة") }
-            if (cleanupResult.isNotBlank()) Text(cleanupResult)
+            if (cleanupResult.isNotBlank()) Text("نتيجة التنظيف: $cleanupResult", color = Color.White)
             Text("تعطيل تطبيقات المصنع أو مسح كاش التطبيقات الأخرى يحتاج صلاحيات إضافية؛ لا ننفذه دون موافقة وفحص توافق.")
             Button(onClick = onBack) { Text("رجوع") }
         }
