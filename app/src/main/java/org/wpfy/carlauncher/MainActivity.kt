@@ -14,6 +14,11 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemBars()
 
+        if (savedInstanceState == null) {
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                org.wpfy.carlauncher.feature.startup.StartupCompanion.launch(this)
+            }, 1200L)
+        }
         setContent {
             CarLauncherApp()
         }
