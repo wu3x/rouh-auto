@@ -30,6 +30,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.wpfy.carlauncher.design.component.CarHeader
+import org.wpfy.carlauncher.design.component.CarIconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.ui.graphics.Color
 
 /** Read-only discovery. No vendor services are started or bound. */
 internal object BluetoothHeadUnitReport {
@@ -97,7 +101,7 @@ internal fun BluetoothDiagnosticsScreen(onBack: () -> Unit) {
     var busy by remember { mutableStateOf(false) }
     var testResult by remember { mutableStateOf("") }
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        CarHeader(title = "تشخيص بلوتوث الشاشة")
+        CarHeader(title = "تشخيص بلوتوث الشاشة", leading = { CarIconButton(icon = Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "رجوع", onClick = onBack) })
         Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("الفحص للقراءة فقط. اختبار تشغيل الخدمة إجراء منفصل يدوي. جرّبه والسيارة واقفة.")
