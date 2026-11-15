@@ -26,6 +26,9 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -134,6 +137,11 @@ fun MiniMap(
     val tileZoom = floor(zoomLevel).toInt().coerceIn(MapStyle.MinZoom.toInt(), MapStyle.MaxZoom.toInt())
     val zoomFraction = (zoomLevel - tileZoom).coerceIn(0f, 0.999f)
     val arabicLabels by ArabicMapLabels.labels.collectAsState()
+    val labelDownloadStatus by ArabicMapLabels.downloadStatus.collectAsState()
+    val labelDownloadProgress by ArabicMapLabels.downloadProgress.collectAsState()
+    val labelDownloadBusy by ArabicMapLabels.downloadBusy.collectAsState()
+    val labelDownloadScope = rememberCoroutineScope()
+    var showLabelDownload by remember { mutableStateOf(false) }
     val labelCell = mapCenter?.let { Pair(kotlin.math.floor(it.latitude / 0.06).toInt(), kotlin.math.floor(it.longitude / 0.06).toInt()) }
     LaunchedEffect(labelCell) {
         val center = mapCenter
@@ -439,6 +447,22 @@ fun MiniMap(
                                 fontWeight = FontWeight.Bold,
                             )
                         }
+                    }
+                }
+            }
+        }
+        Column(modifier = Modifier.align(Alignment.TopStart).padding(9.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Surface(onClick = { showLabelDownload = !showLabelDownload }, color = Color(0xD923344A), shape = CarShapes.extraSmall) {
+                Text("أسماء الأماكن", modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp), color = Color.White, style = MaterialTheme.typography.labelSmall)
+            }
+            if (showLabelDownload) {
+                Surface(color = Color(0xF323344A), shape = CarShapes.extraSmall) {
+                    Column(modifier = Modifier.padding(9.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(labelDownloadStatus, color = Color.White, style = MaterialTheme.typography.labelSmall)
+                        if (labelDownloadBusy) LinearProgressIndicator(progress = { labelDownloadProgress }, modifier = Modifier.fillMaxWidth())
+                        TextButton(enabled = !labelDownloadBusy, onClick = {
+                            labelDownloadScope.launch { ArabicMapLabels.downloadForCachedMap(context, mapCenter?.latitude, mapCenter?.longitude) }
+                        }) { Text(if (labelDownloadBusy) "جارٍ التحميل" else "تحميل أسماء المناطق المحفوظة") }
                     }
                 }
             }
