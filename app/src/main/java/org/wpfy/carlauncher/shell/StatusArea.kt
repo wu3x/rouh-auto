@@ -54,7 +54,7 @@ fun StatusArea(modifier: Modifier = Modifier) {
     }
 
     Column(
-        modifier = modifier.width(64.dp),
+        modifier = modifier.width(86.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
@@ -69,8 +69,8 @@ fun StatusArea(modifier: Modifier = Modifier) {
             Text(
                 text = nextPrayer!!.name,
                 color = Color(0xFFB9C9DB),
-                fontSize = 9.sp,
-                lineHeight = 11.sp,
+                fontSize = 14.sp,
+                lineHeight = 18.sp,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 softWrap = false,
@@ -78,8 +78,8 @@ fun StatusArea(modifier: Modifier = Modifier) {
             Text(
                 text = nextPrayer!!.time,
                 color = Color.White,
-                fontSize = 11.sp,
-                lineHeight = 13.sp,
+                fontSize = 16.sp,
+                lineHeight = 20.sp,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 softWrap = false,
@@ -109,11 +109,11 @@ private fun calculateNextPrayer(context: Context): PrayerDisplay? {
     val today = DateComponents.from(calendar.time)
     val todayTimes = PrayerTimes(coordinates, today, parameters)
     val prayers = listOf(
-        "الفجر" to todayTimes.fajr,
-        "الظهر" to todayTimes.dhuhr,
-        "العصر" to todayTimes.asr,
-        "المغرب" to todayTimes.maghrib,
-        "العشاء" to todayTimes.isha
+        "صلاة الفجر" to todayTimes.fajr,
+        "صلاة الظهر" to todayTimes.dhuhr,
+        "صلاة العصر" to todayTimes.asr,
+        "صلاة المغرب" to todayTimes.maghrib,
+        "صلاة العشاء" to todayTimes.isha
     )
     val upcoming = prayers.firstOrNull { it.second.after(now) } ?: run {
         calendar.add(Calendar.DAY_OF_MONTH, 1)
