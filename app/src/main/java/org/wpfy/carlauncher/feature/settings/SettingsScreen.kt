@@ -120,6 +120,7 @@ fun SettingsScreen(
                 onOpenSystemHealth = { panel = SettingsPanel.SystemHealth.name },
                 onOpenMapNames = { panel = SettingsPanel.MapNames.name },
                 onOpenMapAppearance = { panel = SettingsPanel.MapAppearance.name },
+                onOpenStartupCompanion = { panel = SettingsPanel.StartupCompanion.name },
                 onStartOnBootChange = onStartOnBootChange,
                 onOpenStartupScreen = { panel = SettingsPanel.StartupScreen.name },
                 onOpenRailPosition = { panel = SettingsPanel.RailPosition.name },
@@ -135,6 +136,7 @@ fun SettingsScreen(
             SettingsPanel.SystemHealth -> SystemHealthScreen(onBack = { panel = SettingsPanel.Main.name })
             SettingsPanel.MapNames -> MapNamesScreen(onBack = { panel = SettingsPanel.Main.name })
             SettingsPanel.MapAppearance -> MapAppearanceScreen(onBack = { panel = SettingsPanel.Main.name })
+            SettingsPanel.StartupCompanion -> org.wpfy.carlauncher.feature.startup.StartupCompanionPicker(onBack = { panel = SettingsPanel.Main.name })
 
             SettingsPanel.StartupScreen -> OptionPicker(
                 title = stringResource(R.string.settings_startup_screen),
@@ -205,6 +207,7 @@ private fun SettingsList(
     onOpenSystemHealth: () -> Unit,
     onOpenMapNames: () -> Unit,
     onOpenMapAppearance: () -> Unit,
+    onOpenStartupCompanion: () -> Unit,
     onOpenStartupScreen: () -> Unit,
     onOpenRailPosition: () -> Unit,
     onOpenTextSize: () -> Unit,
@@ -260,6 +263,7 @@ private fun SettingsList(
             contentPadding = PaddingValues(bottom = CarSpacing.Xl),
         ) {
             section(resources.getString(R.string.settings_section_launcher))
+            settingRow(title = "تشغيل تطبيق عند بدء اللانشر", subtitle = "اختيار تطبيق أصلي من النظام — اختياري", onClick = onOpenStartupCompanion, showChevron = true)
             settingRow(
                 title = resources.getString(R.string.settings_home_app),
                 subtitle = if (isDefaultHome) {
@@ -615,6 +619,7 @@ data class DeviceDiagnostics(
 }
 
 private enum class SettingsPanel {
+    StartupCompanion,
     MapAppearance,
     Main,
     Updates,
