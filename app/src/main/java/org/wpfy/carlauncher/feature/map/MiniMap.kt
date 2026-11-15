@@ -137,6 +137,16 @@ fun MiniMap(
     val tileZoom = floor(zoomLevel).toInt().coerceIn(MapStyle.MinZoom.toInt(), MapStyle.MaxZoom.toInt())
     val zoomFraction = (zoomLevel - tileZoom).coerceIn(0f, 0.999f)
     val arabicLabels by ArabicMapLabels.labels.collectAsState()
+    val appearance by MapAppearance.selection.collectAsState()
+    var currentHour by remember { mutableStateOf(java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)) }
+    LaunchedEffect(Unit) {
+        MapAppearance.initialize(context)
+        while (true) {
+            currentHour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+            delay(60_000L)
+        }
+    }
+    val appearanceFilter = MapAppearance.filter(MapAppearance.effective(appearance, currentHour))
     val labelDownloadStatus by ArabicMapLabels.downloadStatus.collectAsState()
     val labelDownloadProgress by ArabicMapLabels.downloadProgress.collectAsState()
     val labelDownloadBusy by ArabicMapLabels.downloadBusy.collectAsState()
@@ -278,10 +288,7 @@ fun MiniMap(
                                 image = tile,
                                 dstOffset = IntOffset(left.roundToInt(), top.roundToInt()),
                                 dstSize = tileSize,
-                                colorFilter = when {
-                                    tileSource.needsDarkFilter -> DarkTileFilter
-                                    else -> null
-                                },
+                                colorFilter = appearanceFilter,
                             )
                         }
                     }
@@ -391,82 +398,6 @@ fun MiniMap(
                 ),
         )
 
-        Column(
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = 6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-            // Show confirmation only after a deliberate tap, never automatically.
-            pendingMode?.let { pending ->
-                Surface(
-                    onClick = {
-                        selectedMode = pending
-                        modePreferences.edit().putString("pinned_mode", pending.name).apply()
-                        pendingMode = null
-                    },
-                    color = Color(0xEE25364A),
-                    shape = CarShapes.extraSmall,
-                ) {
-                    Text(
-                        text = "تثبيت",
-                        modifier = Modifier.padding(horizontal = 13.dp, vertical = 5.dp),
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-            }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(7.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                MapDisplayMode.entries.forEach { mode ->
-                    val active = displayMode == mode
-                    val pinned = selectedMode == mode
-                    Surface(
-                        modifier = Modifier.size(if (active || pinned) 25.dp else 21.dp)
-                            .clickable { pendingMode = if (pendingMode == mode) null else mode },
-                        shape = CircleShape,
-                        color = if (pinned) Color(0xFF3989F7)
-                            else if (active) Color(0xBB3989F7) else Color(0xC9232B36),
-                        border = androidx.compose.foundation.BorderStroke(
-                            if (pinned) 2.dp else 1.dp,
-                            if (pinned) Color.White
-                            else Color.White.copy(alpha = if (active) 0.7f else 0.2f),
-                        ),
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = when (mode) {
-                                    MapDisplayMode.Gps -> "G"
-                                    MapDisplayMode.Online -> "N"
-                                    MapDisplayMode.Decorative -> "D"
-                                },
-                                color = Color.White,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        Column(modifier = Modifier.align(Alignment.TopStart).padding(9.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Surface(onClick = { showLabelDownload = !showLabelDownload }, color = Color(0xD923344A), shape = CarShapes.extraSmall) {
-                Text("أسماء الأماكن", modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp), color = Color.White, style = MaterialTheme.typography.labelSmall)
-            }
-            if (showLabelDownload) {
-                Surface(color = Color(0xF323344A), shape = CarShapes.extraSmall) {
-                    Column(modifier = Modifier.padding(9.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(labelDownloadStatus, color = Color.White, style = MaterialTheme.typography.labelSmall)
-                        if (labelDownloadBusy) LinearProgressIndicator(progress = { labelDownloadProgress }, modifier = Modifier.fillMaxWidth())
-                        TextButton(enabled = !labelDownloadBusy, onClick = {
-                            labelDownloadScope.launch { ArabicMapLabels.downloadForCachedMap(context, mapCenter?.latitude, mapCenter?.longitude) }
-                        }) { Text(if (labelDownloadBusy) "جارٍ التحميل" else "تحميل أسماء المناطق المحفوظة") }
-                    }
-                }
-            }
-        }
         if (decorativeIdle) {
             Text(
                 text = "خريطة توضيحية",
