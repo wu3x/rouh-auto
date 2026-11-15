@@ -76,6 +76,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+    implementation("com.batoulapps.adhan:adhan:1.2.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
