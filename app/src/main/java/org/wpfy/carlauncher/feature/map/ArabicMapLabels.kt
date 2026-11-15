@@ -5,6 +5,8 @@ import android.os.SystemClock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlin.math.pow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -22,7 +24,13 @@ internal object ArabicMapLabels {
     private const val CellDegrees = 0.06
     private const val RefreshMillis = 7L * 24 * 60 * 60 * 1000
     private const val RetryMillis = 30L * 60 * 1000
-    private const val Endpoint = "https://overpass-api.de/api/interpreter"
+    private val Endpoints = listOf("https://overpass.kumi.systems/api/interpreter", "https://overpass-api.de/api/interpreter")
+    private val _downloadStatus = MutableStateFlow("جاهز لتحميل الأسماء")
+    val downloadStatus = _downloadStatus.asStateFlow()
+    private val _downloadProgress = MutableStateFlow(0f)
+    val downloadProgress = _downloadProgress.asStateFlow()
+    private val _downloadBusy = MutableStateFlow(false)
+    val downloadBusy = _downloadBusy.asStateFlow()
     private val mutex = Mutex()
     private val _labels = MutableStateFlow<List<ArabicMapLabel>>(emptyList())
     val labels = _labels.asStateFlow()
@@ -43,7 +51,7 @@ internal object ArabicMapLabels {
                 val file = java.io.File(dir, "$key.json")
                 val cached = runCatching { if (file.isFile) JSONObject(file.readText()) else null }.getOrNull()
                 val cachedLabels = cached?.let(::parseLabels).orEmpty()
-                _labels.value = cachedLabels
+                _labels.value = nearbyLabels(dir, row, col).ifEmpty { cachedLabels }
                 val fresh = cached != null && System.currentTimeMillis() - cached.optLong("savedAt", 0) < RefreshMillis
                 if (fresh) return@withLock
                 val now = SystemClock.elapsedRealtime()
@@ -76,30 +84,117 @@ internal object ArabicMapLabels {
                     dir.listFiles { f -> f.extension == "json" }?.sortedByDescending { it.lastModified() }
                         ?.drop(150)?.forEach { it.delete() }
                 }
-                _labels.value = parsed
+                _labels.value = nearbyLabels(dir, row, col).ifEmpty { parsed }
             }
         }
     }
 
-    private fun fetch(query: String): JSONObject {
-        val connection = (URL(Endpoint).openConnection() as HttpURLConnection).apply {
-            requestMethod = "POST"
-            connectTimeout = 8_000
-            readTimeout = 30_000
-            doOutput = true
-            setRequestProperty("User-Agent", "ROUH-Auto/1.0 (Android map labels; github.com/wu3x/rouh-auto)")
-            setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-        }
-        return try {
-            val body = "data=" + java.net.URLEncoder.encode(query, "UTF-8")
-            connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
-            if (connection.responseCode != 200) error("Overpass HTTP ${connection.responseCode}")
-            val text = connection.inputStream.bufferedReader().use { it.readText() }
-            require(text.length <= 3_000_000) { "Map label response too large" }
-            JSONObject(text)
+    /** Download names for areas where map tile PNGs have actually been cached.
+     * Limited batch size avoids overwhelming public Overpass servers.
+     */
+    suspend fun downloadForCachedMap(context: Context, currentLat: Double?, currentLon: Double?) {
+        if (_downloadBusy.value) return
+        _downloadBusy.value = true
+        _downloadProgress.value = 0f
+        try {
+            val cells = withContext(Dispatchers.IO) {
+                val selected = linkedSetOf<Pair<Int, Int>>()
+                if (currentLat != null && currentLon != null && currentLat in -85.0..85.0 && currentLon in -180.0..180.0) {
+                    selected.add(floor(currentLat / CellDegrees).toInt() to floor(currentLon / CellDegrees).toInt())
+                }
+                val files = java.io.File(context.filesDir, "map_tiles").listFiles().orEmpty()
+                files.filter { it.extension == "png" }.sortedByDescending { it.lastModified() }.forEach { file ->
+                    val match = Regex("""^osm_(\\d+)_(\\d+)_(\\d+)\\.png$""").matchEntire(file.name) ?: return@forEach
+                    val z = match.groupValues[1].toIntOrNull() ?: return@forEach
+                    val x = match.groupValues[2].toIntOrNull() ?: return@forEach
+                    val y = match.groupValues[3].toIntOrNull() ?: return@forEach
+                    if (z !in 10..18) return@forEach
+                    val n = 2.0.pow(z)
+                    val lat = Math.toDegrees(kotlin.math.atan(kotlin.math.sinh(Math.PI * (1.0 - 2.0 * (y + 0.5) / n))))
+                    val lon = (x + 0.5) / n * 360.0 - 180.0
+                    if (lat in -85.0..85.0 && lon in -180.0..180.0) selected.add(floor(lat / CellDegrees).toInt() to floor(lon / CellDegrees).toInt())
+                }
+                selected.toList()
+            }
+            if (cells.isEmpty()) {
+                _downloadStatus.value = "ما لقينا أجزاء خريطة محفوظة. افتح الخريطة مع الإنترنت أولًا."
+                return
+            }
+            val dir = java.io.File(context.filesDir, "arabic_map_labels").apply { mkdirs() }
+            val pending = cells.filter { (r, c) -> !java.io.File(dir, "${r}_${c}.json").isFile }
+            if (pending.isEmpty()) {
+                _downloadProgress.value = 1f
+                _downloadStatus.value = "كل مناطق الخريطة المحفوظة (${cells.size}) لها ملفات أسماء. ما فيه مناطق جديدة."
+                return
+            }
+            val batch = pending.take(12)
+            var succeeded = 0
+            var failed = 0
+            batch.forEachIndexed { i, (row, col) ->
+                _downloadStatus.value = "تحميل أسماء المنطقة ${i + 1} من ${batch.size} (المتبقي من المناطق: ${pending.size - i})"
+                val south = row * CellDegrees
+                val west = col * CellDegrees
+                val query = """[out:json][timeout:25];(nwr["place"]($south,$west,${south + CellDegrees},${west + CellDegrees});way["highway"]["name"]($south,$west,${south + CellDegrees},${west + CellDegrees}););out center;"""
+                val result = withContext(Dispatchers.IO) {
+                    runCatching {
+                        val json = fetch(query)
+                        val parsed = parseLabels(json)
+                        val file = java.io.File(dir, "${row}_${col}.json")
+                        val tmp = java.io.File(dir, "${row}_${col}.tmp")
+                        tmp.writeText(json.put("savedAt", System.currentTimeMillis()).toString())
+                        if (!tmp.renameTo(file)) { file.writeText(tmp.readText()); tmp.delete() }
+                        parsed.size
+                    }
+                }
+                if (result.isSuccess) succeeded++ else failed++
+                _downloadProgress.value = (i + 1f) / batch.size
+            }
+            _downloadStatus.value = "اكتمل: $succeeded منطقة محفوظة، $failed فشلت. باقي ${pending.size - batch.size} منطقة؛ اضغط مجددًا للمتابعة."
+            if (currentLat != null && currentLon != null) loadCached(context, currentLat, currentLon)
         } finally {
-            connection.disconnect()
+            _downloadBusy.value = false
         }
+    }
+
+    suspend fun loadCached(context: Context, lat: Double, lon: Double) = withContext(Dispatchers.IO) {
+        val row = floor(lat / CellDegrees).toInt()
+        val col = floor(lon / CellDegrees).toInt()
+        val dir = java.io.File(context.filesDir, "arabic_map_labels")
+        _labels.value = nearbyLabels(dir, row, col)
+    }
+
+    private fun nearbyLabels(dir: java.io.File, row: Int, col: Int): List<ArabicMapLabel> {
+        val all = ArrayList<ArabicMapLabel>()
+        for (r in row - 1..row + 1) for (c in col - 1..col + 1) {
+            val f = java.io.File(dir, "${r}_${c}.json")
+            if (f.isFile) runCatching { all.addAll(parseLabels(JSONObject(f.readText()))) }
+        }
+        return all.distinctBy { "${it.name}/${(it.lat * 10000).toInt()}/${(it.lon * 10000).toInt()}" }.take(1200)
+    }
+
+    private fun fetch(query: String): JSONObject {
+        var last: Exception? = null
+        for (endpoint in Endpoints) {
+            try {
+                val connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
+                    requestMethod = "POST"
+                    connectTimeout = 8_000
+                    readTimeout = 30_000
+                    doOutput = true
+                    setRequestProperty("User-Agent", "ROUH-Auto/1.3 (Android map labels; github.com/wu3x/rouh-auto)")
+                    setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                }
+                try {
+                    val body = "data=" + java.net.URLEncoder.encode(query, "UTF-8")
+                    connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+                    if (connection.responseCode != 200) error("Overpass HTTP ${connection.responseCode}")
+                    val text = connection.inputStream.bufferedReader().use { it.readText() }
+                    require(text.length <= 3_000_000) { "Map label response too large" }
+                    return JSONObject(text)
+                } finally { connection.disconnect() }
+            } catch (e: Exception) { last = e }
+        }
+        throw last ?: java.io.IOException("No Overpass server available")
     }
 
     private fun parseLabels(json: JSONObject): List<ArabicMapLabel> {
@@ -109,8 +204,8 @@ internal object ArabicMapLabels {
         for (i in 0 until elements.length()) {
             val element = elements.optJSONObject(i) ?: continue
             val tags = element.optJSONObject("tags") ?: continue
-            val name = tags.optString("name:ar").trim()
-            if (name.isBlank() || !name.any { it in '\u0600'..'\u06FF' }) continue
+            val name = tags.optString("name:ar").ifBlank { tags.optString("name") }.trim()
+            if (name.isBlank()) continue
             val center = element.optJSONObject("center") ?: element
             val lat = center.optDouble("lat", Double.NaN)
             val lon = center.optDouble("lon", Double.NaN)
