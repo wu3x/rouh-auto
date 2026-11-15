@@ -48,8 +48,6 @@ fun CarGridItem(
         modifier = modifier
             .height(156.dp)
             .clip(CarShapes.small)
-            .background(CarColors.SurfaceContainer)
-            .border(1.dp, CarColors.Outline.copy(alpha = 0.5f), CarShapes.small)
             .then(interactionModifier)
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
