@@ -12,6 +12,7 @@ import android.os.BatteryManager
 import android.os.Build
 import android.os.Environment
 import android.os.StatFs
+import java.io.File
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,6 +41,18 @@ import org.wpfy.carlauncher.design.component.CarHeader
  */
 internal object SystemHealthScanner {
     private fun size(bytes: Long): String = "%.2f GB".format(java.util.Locale.US, bytes / 1073741824.0)
+    suspend fun cleanTemporaryFiles(context: Context): String = withContext(Dispatchers.IO) {
+        val cache = context.cacheDir
+        val before = StatFs(Environment.getDataDirectory().path).availableBytes
+        var removed = 0
+        var failed = 0
+        cache.listFiles().orEmpty().filter { it.name.startsWith("rouh_temp_") }.forEach { file ->
+            if (file.isFile && file.canonicalPath.startsWith(cache.canonicalPath + File.separator) && file.delete()) removed++ else failed++
+        }
+        val after = StatFs(Environment.getDataDirectory().path).availableBytes
+        "حذفنا $removed ملف مؤقت من ROUH، وتعذر حذف $failed. المساحة قبل: ${size(before)}، بعد: ${size(after)}، الفرق: ${after - before} بايت. لم نلمس الخرائط أو تطبيقات المصنع."
+    }
+
     @Suppress("DEPRECATION")
     suspend fun scan(context: Context): String = withContext(Dispatchers.IO) {
         val out = StringBuilder()
@@ -112,6 +125,7 @@ internal fun SystemHealthScreen(onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     var busy by remember { mutableStateOf(false) }
     var report by remember { mutableStateOf("") }
+    var cleanupResult by remember { mutableStateOf("") }
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         CarHeader(title = "فحص النظام وتنظيفه")
         Column(
@@ -135,7 +149,17 @@ internal fun SystemHealthScreen(onBack: () -> Unit) {
                 }) { Text("نسخ تقرير الفحص") }
                 Text(report)
             }
-            Text("التنظيف الفعلي غير مفعّل حفاظًا على خدمات MCU والبلوتوث وCAN. نراجع التقرير أولًا.")
+            Text("تنظيف حقيقي محدود لملفات ROUH المؤقتة فقط، مع قياس المساحة قبل وبعد. لا يحذف الخرائط أو أسماء الأماكن.")
+            Button(enabled = !busy, onClick = {
+                busy = true
+                scope.launch {
+                    cleanupResult = runCatching { SystemHealthScanner.cleanTemporaryFiles(context) }
+                        .getOrElse { "فشل التنظيف: ${it.message}" }
+                    busy = false
+                }
+            }) { Text("تنظيف ملفات ROUH المؤقتة") }
+            if (cleanupResult.isNotBlank()) Text(cleanupResult)
+            Text("تعطيل تطبيقات المصنع أو مسح كاش التطبيقات الأخرى يحتاج صلاحيات إضافية؛ لا ننفذه دون موافقة وفحص توافق.")
             Button(onClick = onBack) { Text("رجوع") }
         }
     }
