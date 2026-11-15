@@ -104,7 +104,7 @@ internal object ArabicMapLabels {
                 }
                 val files = java.io.File(context.filesDir, "map_tiles").listFiles().orEmpty()
                 files.filter { it.extension == "png" }.sortedByDescending { it.lastModified() }.forEach { file ->
-                    val match = Regex("""^osm_(\\d+)_(\\d+)_(\\d+)\\.png$""").matchEntire(file.name) ?: return@forEach
+                    val match = Regex("""^osm_([0-9]+)_([0-9]+)_([0-9]+)[.]png$""").matchEntire(file.name) ?: return@forEach
                     val z = match.groupValues[1].toIntOrNull() ?: return@forEach
                     val x = match.groupValues[2].toIntOrNull() ?: return@forEach
                     val y = match.groupValues[3].toIntOrNull() ?: return@forEach
