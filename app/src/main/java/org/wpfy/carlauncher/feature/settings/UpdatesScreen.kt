@@ -9,6 +9,14 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.Alignment
+import org.wpfy.carlauncher.design.component.CarIconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,6 +41,7 @@ internal fun UpdatesScreen(onBack: () -> Unit) {
     var busy by remember { mutableStateOf(false) }
     var downloading by remember { mutableStateOf(false) }
     var progress by remember { mutableIntStateOf(0) }
+    var checked by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf("جارٍ التحقق من التحديثات...") }
     val installed = remember(context) { RouhUpdater.installedCode(context) }
     val installedName = remember(context) { RouhUpdater.installedName(context) }
@@ -40,13 +49,15 @@ internal fun UpdatesScreen(onBack: () -> Unit) {
     fun check() {
         if (busy) return
         busy = true
+        checked = false
         downloading = false
         message = "جارٍ التحقق من GitHub..."
         scope.launch {
             try {
                 release = RouhUpdater.check()
+                checked = true
                 message = if (release!!.versionCode > installed)
-                    "يتوفر تحديث جديد" else "أنت تستخدم أحدث إصدار متوفر"
+                    "نعم، لقينا تحديث جديد! تقدر تحمّله وتثبته من الزر اللي تحت." else "تم الفحص: أنت تستخدم أحدث إصدار متوفر."
             } catch (e: Exception) {
                 release = null
                 message = e.message ?: "تعذر التحقق. تأكد من اتصال الإنترنت."
@@ -61,16 +72,21 @@ internal fun UpdatesScreen(onBack: () -> Unit) {
         modifier = Modifier.fillMaxSize().widthIn(max = 1032.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
-        CarHeader(title = "التحديثات")
+        CarHeader(title = "التحديثات", leading = { CarIconButton(icon = Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "رجوع", onClick = onBack) })
         Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Text("الإصدار المثبت: $installedName (بناء $installed)", color = CarColors.TextSecondary)
             release?.let {
                 Text("آخر إصدار: ${it.versionName} (بناء ${it.versionCode})", style = MaterialTheme.typography.titleMedium)
             }
-            Text(message)
+            Surface(color = Color(0xFF1D2938), shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(if (busy && !downloading) "جارٍ البحث…" else if (checked && release != null && release!!.versionCode > installed) "تحديث متوفر" else if (checked) "النسخة محدثة" else "نتيجة التحقق", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                    Text(message, color = Color(0xFFE0E8F2))
+                }
+            }
             if (downloading) {
                 LinearProgressIndicator(progress = { progress / 100f }, modifier = Modifier.fillMaxWidth())
-                Text("التنزيل: $progress%")
+                Text("التنزيل: $progress%", color = Color.White)
             }
             Button(enabled = !busy, onClick = { check() }) { Text("التحقق من التحديثات") }
             val available = release
@@ -99,7 +115,7 @@ internal fun UpdatesScreen(onBack: () -> Unit) {
                 color = CarColors.TextSecondary,
                 style = MaterialTheme.typography.bodySmall,
             )
-            Button(onClick = onBack) { Text("رجوع للإعدادات") }
+
         }
     }
 }
