@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.batoulapps.adhan.CalculationMethod
 import com.batoulapps.adhan.CalculationParameters
 import com.batoulapps.adhan.Coordinates
-import com.batoulapps.adhan.DateComponents
+import com.batoulapps.adhan.data.DateComponents
 import com.batoulapps.adhan.PrayerTimes
 import kotlinx.coroutines.delay
 import org.wpfy.carlauncher.design.theme.CarColors
