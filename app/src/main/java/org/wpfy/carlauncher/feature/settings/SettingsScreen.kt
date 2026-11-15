@@ -118,6 +118,7 @@ fun SettingsScreen(
                 onOpenUpdates = { panel = SettingsPanel.Updates.name },
                 onOpenBluetoothDiagnostics = { panel = SettingsPanel.BluetoothDiagnostics.name },
                 onOpenSystemHealth = { panel = SettingsPanel.SystemHealth.name },
+                onOpenMapNames = { panel = SettingsPanel.MapNames.name },
                 onStartOnBootChange = onStartOnBootChange,
                 onOpenStartupScreen = { panel = SettingsPanel.StartupScreen.name },
                 onOpenRailPosition = { panel = SettingsPanel.RailPosition.name },
@@ -131,6 +132,7 @@ fun SettingsScreen(
             SettingsPanel.Updates -> UpdatesScreen(onBack = { panel = SettingsPanel.Main.name })
             SettingsPanel.BluetoothDiagnostics -> BluetoothDiagnosticsScreen(onBack = { panel = SettingsPanel.Main.name })
             SettingsPanel.SystemHealth -> SystemHealthScreen(onBack = { panel = SettingsPanel.Main.name })
+            SettingsPanel.MapNames -> MapNamesScreen(onBack = { panel = SettingsPanel.Main.name })
 
             SettingsPanel.StartupScreen -> OptionPicker(
                 title = stringResource(R.string.settings_startup_screen),
@@ -199,6 +201,7 @@ private fun SettingsList(
     onOpenUpdates: () -> Unit,
     onOpenBluetoothDiagnostics: () -> Unit,
     onOpenSystemHealth: () -> Unit,
+    onOpenMapNames: () -> Unit,
     onOpenStartupScreen: () -> Unit,
     onOpenRailPosition: () -> Unit,
     onOpenTextSize: () -> Unit,
@@ -352,6 +355,12 @@ private fun SettingsList(
             )
 
             section(resources.getString(R.string.settings_section_system))
+            settingRow(
+                title = "تحميل أسماء الأماكن في الخريطة",
+                subtitle = "تحميل الأسماء للمناطق المحفوظة مع شريط تقدم",
+                onClick = onOpenMapNames,
+                showChevron = true,
+            )
             settingRow(
                 title = "فحص النظام وتنظيفه",
                 subtitle = "فحص حقيقي للذاكرة والتخزين وتطبيقات المصنع — للقراءة فقط",
@@ -601,6 +610,7 @@ private enum class SettingsPanel {
     Updates,
     BluetoothDiagnostics,
     SystemHealth,
+    MapNames,
     StartupScreen,
     RailPosition,
     TextSize,
